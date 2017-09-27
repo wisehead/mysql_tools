@@ -1,0 +1,3 @@
+#cp /home/chenhui/mysql-baidu-5623/sql/mysqld /ssd4/mysql_ch/libexec 
+cp $TOP/sql/mysqld $bpath/libexec 
+#cp $TOP/output/sql/mysqld /ssd4/mysql_ch/libexec 

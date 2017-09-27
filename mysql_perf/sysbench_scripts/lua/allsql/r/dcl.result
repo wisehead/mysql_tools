@@ -1,0 +1,610 @@
+create database if not exists testdb;
+use testdb;
+SET storage_engine=innodb;
+create table tbl(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7));
+insert tbl values(NULL, 2, 3, 4.4, 5.5, '6', '7', '8', '9');
+insert into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert low_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert high_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+alter table tbl engine=myisam;
+insert delayed into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9');
+alter table tbl engine=innodb;
+insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9');
+insert tbl values(NULL, 1*2, 3+10, 4.4, 5.5, '6', '7', '8', '9');
+insert tbl values(NULL, default, default, default, default, default, default, '8', '9');
+insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9'), (NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9') on duplicate key update col3=values(col3)+values(col3);
+insert low_priority ignore tbl set col2=default, col8='8', col9='9';
+insert high_priority tbl set col2=default, col8='8', col9='9' on duplicate key update col3=values(col3)+100;
+create table tbl2(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7));
+insert tbl2 values(2, 12, 13, 14.4, 15.5, '16', '17', '18', '19');
+insert tbl2 values(10, 22, 23, 24.4, 25.5, '26', '27', '28', '29');
+insert high_priority ignore tbl select * from tbl2;
+insert low_priority ignore tbl(col2, col4, col6, col8, col9) select col2, col4, col6, col8, col9 from tbl2;
+select * from tbl;
+col1	col2	col3	col4	col5	col6	col7	col8	col9
+1	2	3	4.4	5.5	6	7	8	9
+2	2	0	4.4	0	6		8	9
+3	2	0	4.4	0	6		8	9
+4	2	0	4.4	0	6		8	9
+5	2	0	4.4	0	6		8	9
+6	2	0	4.4	0	6		8	9
+7	2	0	4.4	0	6		8	9
+8	2	0	4.4	0	6		8	9
+9	2	0	4.4	0	6		8	9
+10	10	13	4.4	5.5	6	7	8	9
+11	2	13	4.4	5.5	6	7	8	9
+12	0	0	0	0			8	9
+13	10	13	4.4	5.5	6	7	8	9
+14	10	13	4.4	5.5	6	7	8	9
+15	0	0	0	0			8	9
+16	0	0	0	0			8	9
+17	12	0	14.4	0	16		18	19
+18	22	0	24.4	0	26		28	29
+create user user1;
+create user user2 identified by '123';
+create user user3@localhost identified by '123', user4 identified by '456';
+select password('123');
+password('123')
+*23AE809DDACAF96AF0FD78ED04B6A265E05AA257
+create user user5 identified by password '*23AE809DDACAF96AF0FD78ED04B6A265E05AA257';
+select user,host,password from mysql.user;
+user	host	password
+root	localhost	
+root	m1-dba-qa-yushaozai-07.m1.baidu.com	
+root	127.0.0.1	
+user2	%	*23AE809DDACAF96AF0FD78ED04B6A265E05AA257
+user1	%	
+user3	localhost	*23AE809DDACAF96AF0FD78ED04B6A265E05AA257
+user4	%	*531E182E2F72080AB0740FE2F2D689DBE0146E04
+user5	%	*23AE809DDACAF96AF0FD78ED04B6A265E05AA257
+rename user user2 to new_user2;
+rename user new_user2 to user2, user3@localhost to new_user3@localhost, new_user3@localhost to user3@localhost;
+set password = password('123456');
+set password for root@localhost = password('');
+set password for user3@localhost =password('321');
+set password for user1 =password('321');
+select user,host,password from mysql.user;
+user	host	password
+root	localhost	
+root	m1-dba-qa-yushaozai-07.m1.baidu.com	
+root	127.0.0.1	
+user2	%	*23AE809DDACAF96AF0FD78ED04B6A265E05AA257
+user1	%	*7297C3E22DEB91303FC493303A8158AD4231F486
+user3	localhost	*7297C3E22DEB91303FC493303A8158AD4231F486
+user4	%	*531E182E2F72080AB0740FE2F2D689DBE0146E04
+user5	%	*23AE809DDACAF96AF0FD78ED04B6A265E05AA257
+drop user user1, user2, user3@localhost, user4, user5;
+grant all on *.* to user1@localhost identified by '123' with grant option;
+grant all on testdb.* to user2@localhost identified by '123';
+grant all on testdb.tbl to user3@'%' identified by '123';
+grant select(col1,col2,col8,col9) on testdb.tbl to user4@localhost identified by '123';
+grant create routine on *.* to user5@localhost;
+grant all on testdb.tbl to user6@'%' identified by '123' with max_queries_per_hour 100;
+grant all privileges on testdb.* TO 'user7'@'localhost' REQUIRE SSL;
+grant all privileges on testdb.* TO 'user8'@'localhost' REQUIRE X509;
+grant all privileges on testdb.* TO 'user9'@'localhost' REQUIRE ISSUER '/C=FI/ST=Some-State/L=Helsinki/O=MySQL Finland AB/CN=Tonu Samuel/Email=tonu@example.com';
+grant all privileges on testdb.* TO 'user10'@'localhost' REQUIRE CIPHER 'EDH-RSA-DES-CBC3-SHA';
+revoke all privileges, grant option from user1@localhost;
+revoke all on testdb.* from user2@localhost;
+select user,host,password from mysql.user;
+user	host	password
+root	localhost	
+root	m1-dba-qa-yushaozai-07.m1.baidu.com	
+root	127.0.0.1	
+user4	localhost	*23AE809DDACAF96AF0FD78ED04B6A265E05AA257
+user3	%	*23AE809DDACAF96AF0FD78ED04B6A265E05AA257
+user2	localhost	*23AE809DDACAF96AF0FD78ED04B6A265E05AA257
+user1	localhost	*23AE809DDACAF96AF0FD78ED04B6A265E05AA257
+user5	localhost	
+user6	%	*23AE809DDACAF96AF0FD78ED04B6A265E05AA257
+user7	localhost	
+user8	localhost	
+user9	localhost	
+user10	localhost	
+drop user user1@localhost, user2@localhost, user3@'%', user4@localhost, user5@localhost, user6@'%', user7@localhost, user8@localhost, user9@localhost, user10@localhost;
+analyze table tbl;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	analyze	status	OK
+analyze no_write_to_binlog table tbl;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	analyze	status	OK
+analyze local table tbl;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	analyze	status	OK
+alter table tbl engine = myisam;
+backup table tbl to 'tbl.data';
+Table	Op	Msg_type	Msg_text
+testdb.tbl	backup	error	Failed copying .frm file (errno: 2)
+testdb.tbl	backup	Warning	'BACKUP TABLE' is deprecated and will be removed in a future release. Please use MySQL Administrator (mysqldump, mysql) instead
+testdb.tbl	backup	Error	Can't create/write to file '/home/work/mysql/mysql_encrypt_master/mysql-test/var/mysqld.1/data/tbl.data/tbl.frm' (Errcode: 2)
+testdb.tbl	backup	status	Operation failed
+alter table tbl engine = innodb;
+check table tbl;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	check	status	OK
+check table tbl quick;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	check	status	OK
+check table tbl fast;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	check	status	OK
+check table tbl medium;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	check	status	OK
+check table tbl extended;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	check	status	OK
+check table tbl changed;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	check	status	OK
+checksum table tbl;
+Table	Checksum
+testdb.tbl	3511818219
+checksum table tbl quick;
+Table	Checksum
+testdb.tbl	NULL
+checksum table tbl extended;
+Table	Checksum
+testdb.tbl	3511818219
+alter table tbl engine = myisam;
+optimize table tbl;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	optimize	status	OK
+optimize local table tbl;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	optimize	status	Table is already up to date
+optimize no_write_to_binlog table tbl;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	optimize	status	Table is already up to date
+repair table tbl;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	repair	status	OK
+repair table tbl quick extended;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	repair	status	OK
+repair local table tbl use_frm;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	repair	warning	Number of rows changed from 0 to 18
+testdb.tbl	repair	status	OK
+repair no_write_to_binlog table tbl quick;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	repair	status	OK
+restore table tbl from 'tbl.data';
+Table	Op	Msg_type	Msg_text
+tbl	restore	error	table exists, will not overwrite on restore
+Warnings:
+Warning	1287	'RESTORE TABLE' is deprecated and will be removed in a future release. Please use MySQL Administrator (mysqldump, mysql) instead
+alter table tbl engine = innodb;
+set @myVar =100;
+set character_set_client=utf8;
+set @@global.character_set_client=gbk;
+set @@global.character_set_client=gbk,session character_set_client=gbk;
+set @@global.character_set_client=latin1,session character_set_client=latin1;
+set character_set_client=default;
+show character set;
+Charset	Description	Default collation	Maxlen
+big5	Big5 Traditional Chinese	big5_chinese_ci	2
+dec8	DEC West European	dec8_swedish_ci	1
+cp850	DOS West European	cp850_general_ci	1
+hp8	HP West European	hp8_english_ci	1
+koi8r	KOI8-R Relcom Russian	koi8r_general_ci	1
+latin1	cp1252 West European	latin1_swedish_ci	1
+latin2	ISO 8859-2 Central European	latin2_general_ci	1
+swe7	7bit Swedish	swe7_swedish_ci	1
+ascii	US ASCII	ascii_general_ci	1
+hebrew	ISO 8859-8 Hebrew	hebrew_general_ci	1
+koi8u	KOI8-U Ukrainian	koi8u_general_ci	1
+gb2312	GB2312 Simplified Chinese	gb2312_chinese_ci	2
+greek	ISO 8859-7 Greek	greek_general_ci	1
+cp1250	Windows Central European	cp1250_general_ci	1
+gbk	GBK Simplified Chinese	gbk_chinese_ci	2
+latin5	ISO 8859-9 Turkish	latin5_turkish_ci	1
+armscii8	ARMSCII-8 Armenian	armscii8_general_ci	1
+utf8	UTF-8 Unicode	utf8_general_ci	3
+cp866	DOS Russian	cp866_general_ci	1
+keybcs2	DOS Kamenicky Czech-Slovak	keybcs2_general_ci	1
+macce	Mac Central European	macce_general_ci	1
+macroman	Mac West European	macroman_general_ci	1
+cp852	DOS Central European	cp852_general_ci	1
+latin7	ISO 8859-13 Baltic	latin7_general_ci	1
+cp1251	Windows Cyrillic	cp1251_general_ci	1
+cp1256	Windows Arabic	cp1256_general_ci	1
+cp1257	Windows Baltic	cp1257_general_ci	1
+binary	Binary pseudo charset	binary	1
+geostd8	GEOSTD8 Georgian	geostd8_general_ci	1
+show character set like '%latin%';
+Charset	Description	Default collation	Maxlen
+latin1	cp1252 West European	latin1_swedish_ci	1
+latin2	ISO 8859-2 Central European	latin2_general_ci	1
+latin5	ISO 8859-9 Turkish	latin5_turkish_ci	1
+latin7	ISO 8859-13 Baltic	latin7_general_ci	1
+show collation;
+Collation	Charset	Id	Default	Compiled	Sortlen
+big5_chinese_ci	big5	1	Yes	Yes	1
+big5_bin	big5	84		Yes	1
+dec8_swedish_ci	dec8	3	Yes		0
+dec8_bin	dec8	69			0
+cp850_general_ci	cp850	4	Yes		0
+cp850_bin	cp850	80			0
+hp8_english_ci	hp8	6	Yes		0
+hp8_bin	hp8	72			0
+koi8r_general_ci	koi8r	7	Yes		0
+koi8r_bin	koi8r	74			0
+latin1_german1_ci	latin1	5		Yes	1
+latin1_swedish_ci	latin1	8	Yes	Yes	1
+latin1_danish_ci	latin1	15		Yes	1
+latin1_german2_ci	latin1	31		Yes	2
+latin1_bin	latin1	47		Yes	1
+latin1_general_ci	latin1	48		Yes	1
+latin1_general_cs	latin1	49		Yes	1
+latin1_spanish_ci	latin1	94		Yes	1
+latin2_general_ci	latin2	9	Yes		0
+latin2_hungarian_ci	latin2	21			0
+latin2_croatian_ci	latin2	27			0
+latin2_bin	latin2	77			0
+swe7_swedish_ci	swe7	10	Yes		0
+swe7_bin	swe7	82			0
+ascii_general_ci	ascii	11	Yes	Yes	1
+ascii_bin	ascii	65		Yes	1
+hebrew_general_ci	hebrew	16	Yes		0
+hebrew_bin	hebrew	71			0
+koi8u_general_ci	koi8u	22	Yes		0
+koi8u_bin	koi8u	75			0
+gb2312_chinese_ci	gb2312	24	Yes	Yes	1
+gb2312_bin	gb2312	86		Yes	1
+greek_general_ci	greek	25	Yes		0
+greek_bin	greek	70			0
+cp1250_general_ci	cp1250	26	Yes		0
+cp1250_croatian_ci	cp1250	44			0
+cp1250_bin	cp1250	66			0
+cp1250_polish_ci	cp1250	99			0
+gbk_chinese_ci	gbk	28	Yes	Yes	1
+gbk_bin	gbk	87		Yes	1
+latin5_turkish_ci	latin5	30	Yes		0
+latin5_bin	latin5	78			0
+armscii8_general_ci	armscii8	32	Yes		0
+armscii8_bin	armscii8	64			0
+utf8_general_ci	utf8	33	Yes	Yes	1
+utf8_bin	utf8	83		Yes	1
+utf8_unicode_ci	utf8	192		Yes	8
+utf8_icelandic_ci	utf8	193		Yes	8
+utf8_latvian_ci	utf8	194		Yes	8
+utf8_romanian_ci	utf8	195		Yes	8
+utf8_slovenian_ci	utf8	196		Yes	8
+utf8_polish_ci	utf8	197		Yes	8
+utf8_estonian_ci	utf8	198		Yes	8
+utf8_spanish_ci	utf8	199		Yes	8
+utf8_swedish_ci	utf8	200		Yes	8
+utf8_turkish_ci	utf8	201		Yes	8
+utf8_czech_ci	utf8	202		Yes	8
+utf8_danish_ci	utf8	203		Yes	8
+utf8_lithuanian_ci	utf8	204		Yes	8
+utf8_slovak_ci	utf8	205		Yes	8
+utf8_spanish2_ci	utf8	206		Yes	8
+utf8_roman_ci	utf8	207		Yes	8
+utf8_persian_ci	utf8	208		Yes	8
+utf8_esperanto_ci	utf8	209		Yes	8
+utf8_hungarian_ci	utf8	210		Yes	8
+utf8_general_mysql500_ci	utf8	223		Yes	1
+cp866_general_ci	cp866	36	Yes		0
+cp866_bin	cp866	68			0
+keybcs2_general_ci	keybcs2	37	Yes		0
+keybcs2_bin	keybcs2	73			0
+macce_general_ci	macce	38	Yes		0
+macce_bin	macce	43			0
+macroman_general_ci	macroman	39	Yes		0
+macroman_bin	macroman	53			0
+cp852_general_ci	cp852	40	Yes		0
+cp852_bin	cp852	81			0
+latin7_estonian_cs	latin7	20			0
+latin7_general_ci	latin7	41	Yes		0
+latin7_general_cs	latin7	42			0
+latin7_bin	latin7	79			0
+cp1251_bulgarian_ci	cp1251	14			0
+cp1251_ukrainian_ci	cp1251	23			0
+cp1251_bin	cp1251	50			0
+cp1251_general_ci	cp1251	51	Yes		0
+cp1251_general_cs	cp1251	52			0
+cp1256_general_ci	cp1256	57	Yes		0
+cp1256_bin	cp1256	67			0
+cp1257_lithuanian_ci	cp1257	29			0
+cp1257_bin	cp1257	58			0
+cp1257_general_ci	cp1257	59	Yes		0
+binary	binary	63	Yes	Yes	1
+geostd8_general_ci	geostd8	92	Yes		0
+geostd8_bin	geostd8	93			0
+show collation like 'latin1%';
+Collation	Charset	Id	Default	Compiled	Sortlen
+latin1_german1_ci	latin1	5		Yes	1
+latin1_swedish_ci	latin1	8	Yes	Yes	1
+latin1_danish_ci	latin1	15		Yes	1
+latin1_german2_ci	latin1	31		Yes	2
+latin1_bin	latin1	47		Yes	1
+latin1_general_ci	latin1	48		Yes	1
+latin1_general_cs	latin1	49		Yes	1
+latin1_spanish_ci	latin1	94		Yes	1
+show columns from tbl;
+Field	Type	Null	Key	Default	Extra
+col1	int(11)	NO	PRI	NULL	auto_increment
+col2	int(11) encrypt	NO	MUL	0	
+col3	bigint(20) encrypt	NO	MUL	0	
+col4	float encrypt	NO	MUL	0	
+col5	double encrypt	NO	MUL	0	
+col6	char(10) encrypt	NO	MUL		
+col7	varchar(100) encrypt	NO	MUL		
+col8	text encrypt	NO		NULL	
+col9	blob encrypt	NO		NULL	
+show full columns from tbl from testdb;
+Field	Type	Collation	Null	Key	Default	Extra	Privileges	Comment
+col1	int(11)	NULL	NO	PRI	NULL	auto_increment	select,insert,update,references	
+col2	int(11) encrypt	NULL	NO	MUL	0		select,insert,update,references	
+col3	bigint(20) encrypt	NULL	NO	MUL	0		select,insert,update,references	
+col4	float encrypt	NULL	NO	MUL	0		select,insert,update,references	
+col5	double encrypt	NULL	NO	MUL	0		select,insert,update,references	
+col6	char(10) encrypt	latin1_swedish_ci	NO	MUL			select,insert,update,references	
+col7	varchar(100) encrypt	latin1_swedish_ci	NO	MUL			select,insert,update,references	
+col8	text encrypt	latin1_swedish_ci	NO		NULL		select,insert,update,references	
+col9	blob encrypt	NULL	NO		NULL		select,insert,update,references	
+show full columns from testdb.tbl like 'col8';
+Field	Type	Collation	Null	Key	Default	Extra	Privileges	Comment
+col8	text encrypt	latin1_swedish_ci	NO		NULL		select,insert,update,references	
+show create database testdb;
+Database	Create Database
+testdb	CREATE DATABASE `testdb` /*!40100 DEFAULT CHARACTER SET latin1 */
+show create schema testdb;
+Database	Create Database
+testdb	CREATE DATABASE `testdb` /*!40100 DEFAULT CHARACTER SET latin1 */
+show create table tbl;
+Table	Create Table
+tbl	CREATE TABLE `tbl` (
+  `col1` int(11) NOT NULL AUTO_INCREMENT,
+  `col2` int(11) encrypt NOT NULL DEFAULT '0',
+  `col3` bigint(20) encrypt NOT NULL DEFAULT '0',
+  `col4` float encrypt NOT NULL DEFAULT '0',
+  `col5` double encrypt NOT NULL DEFAULT '0',
+  `col6` char(10) encrypt NOT NULL DEFAULT '',
+  `col7` varchar(100) encrypt NOT NULL DEFAULT '',
+  `col8` text encrypt NOT NULL,
+  `col9` blob encrypt NOT NULL,
+  PRIMARY KEY (`col1`),
+  KEY `col2` (`col2`),
+  KEY `col3` (`col3`),
+  KEY `col4` (`col4`),
+  KEY `col5` (`col5`),
+  KEY `col6` (`col6`),
+  KEY `col7` (`col7`(112))
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1
+show databases;
+Database
+information_schema
+mtr
+mysql
+test
+testdb
+show schemas;
+Database
+information_schema
+mtr
+mysql
+test
+testdb
+show databases like '%test%';
+Database (%test%)
+test
+testdb
+show engine myisam logs;
+Type	Name	Status
+show engines;
+Engine	Support	Comment	Transactions	XA	Savepoints
+CSV	YES	CSV storage engine	NO	NO	NO
+MRG_MYISAM	YES	Collection of identical MyISAM tables	NO	NO	NO
+MEMORY	YES	Hash based, stored in memory, useful for temporary tables	NO	NO	NO
+InnoDB	DEFAULT	Supports transactions, row-level locking, and foreign keys	YES	YES	YES
+MyISAM	YES	Default engine as of MySQL 3.23 with great performance	NO	NO	NO
+show storage engines;
+Engine	Support	Comment	Transactions	XA	Savepoints
+CSV	YES	CSV storage engine	NO	NO	NO
+MRG_MYISAM	YES	Collection of identical MyISAM tables	NO	NO	NO
+MEMORY	YES	Hash based, stored in memory, useful for temporary tables	NO	NO	NO
+InnoDB	DEFAULT	Supports transactions, row-level locking, and foreign keys	YES	YES	YES
+MyISAM	YES	Default engine as of MySQL 3.23 with great performance	NO	NO	NO
+show table types;
+Engine	Support	Comment	Transactions	XA	Savepoints
+CSV	YES	CSV storage engine	NO	NO	NO
+MRG_MYISAM	YES	Collection of identical MyISAM tables	NO	NO	NO
+MEMORY	YES	Hash based, stored in memory, useful for temporary tables	NO	NO	NO
+InnoDB	DEFAULT	Supports transactions, row-level locking, and foreign keys	YES	YES	YES
+MyISAM	YES	Default engine as of MySQL 3.23 with great performance	NO	NO	NO
+Warnings:
+Warning	1287	'SHOW TABLE TYPES' is deprecated and will be removed in a future release. Please use 'SHOW [STORAGE] ENGINES' instead
+show grants for 'root'@'localhost';
+Grants for root@localhost
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION
+show grants;
+Grants for root@localhost
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION
+show grants for current_user;
+Grants for root@localhost
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION
+show grants for current_user();
+Grants for root@localhost
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION
+show index from tbl;
+Table	Non_unique	Key_name	Seq_in_index	Column_name	Collation	Cardinality	Sub_part	Packed	Null	Index_type	Comment
+tbl	0	PRIMARY	1	col1	A	2	NULL	NULL		BTREE	
+tbl	1	col2	1	col2	A	2	NULL	NULL		BTREE	
+tbl	1	col3	1	col3	A	2	NULL	NULL		BTREE	
+tbl	1	col4	1	col4	A	2	NULL	NULL		BTREE	
+tbl	1	col5	1	col5	A	2	NULL	NULL		BTREE	
+tbl	1	col6	1	col6	A	2	NULL	NULL		BTREE	
+tbl	1	col7	1	col7	A	2	112	NULL		BTREE	
+show index from tbl from testdb;
+Table	Non_unique	Key_name	Seq_in_index	Column_name	Collation	Cardinality	Sub_part	Packed	Null	Index_type	Comment
+tbl	0	PRIMARY	1	col1	A	2	NULL	NULL		BTREE	
+tbl	1	col2	1	col2	A	2	NULL	NULL		BTREE	
+tbl	1	col3	1	col3	A	2	NULL	NULL		BTREE	
+tbl	1	col4	1	col4	A	2	NULL	NULL		BTREE	
+tbl	1	col5	1	col5	A	2	NULL	NULL		BTREE	
+tbl	1	col6	1	col6	A	2	NULL	NULL		BTREE	
+tbl	1	col7	1	col7	A	2	112	NULL		BTREE	
+show index from testdb.tbl;
+Table	Non_unique	Key_name	Seq_in_index	Column_name	Collation	Cardinality	Sub_part	Packed	Null	Index_type	Comment
+tbl	0	PRIMARY	1	col1	A	2	NULL	NULL		BTREE	
+tbl	1	col2	1	col2	A	2	NULL	NULL		BTREE	
+tbl	1	col3	1	col3	A	2	NULL	NULL		BTREE	
+tbl	1	col4	1	col4	A	2	NULL	NULL		BTREE	
+tbl	1	col5	1	col5	A	2	NULL	NULL		BTREE	
+tbl	1	col6	1	col6	A	2	NULL	NULL		BTREE	
+tbl	1	col7	1	col7	A	2	112	NULL		BTREE	
+show open tables;
+Database	Table	In_use	Name_locked
+mysql	servers	0	0
+testdb	tbl2	0	0
+mysql	time_zone	0	0
+mysql	db	0	0
+mysql	time_zone_transition	0	0
+mysql	user	0	0
+mysql	time_zone_transition_type	0	0
+mysql	tables_priv	0	0
+mysql	procs_priv	0	0
+mysql	time_zone_name	0	0
+mysql	help_category	0	0
+mysql	help_relation	0	0
+mysql	func	0	0
+mysql	host	0	0
+testdb	tbl	0	0
+mysql	risky_commands	0	0
+mysql	help_keyword	0	0
+mysql	proc	0	0
+mysql	event	0	0
+mysql	columns_priv	0	0
+mysql	time_zone_leap_second	0	0
+show open tables like 'tbl';
+Database	Table	In_use	Name_locked
+testdb	tbl	0	0
+show open tables from testdb;
+Database	Table	In_use	Name_locked
+testdb	tbl2	0	0
+testdb	tbl	0	0
+show privileges;
+Privilege	Context	Comment
+Alter	Tables	To alter the table
+Alter routine	Functions,Procedures	To alter or drop stored functions/procedures
+Create	Databases,Tables,Indexes	To create new databases and tables
+Create routine	Databases	To use CREATE FUNCTION/PROCEDURE
+Create temporary tables	Databases	To use CREATE TEMPORARY TABLE
+Create view	Tables	To create new views
+Create user	Server Admin	To create new users
+Delete	Tables	To delete existing rows
+Drop	Databases,Tables	To drop databases, tables, and views
+Event	Server Admin	To create, alter, drop and execute events
+Execute	Functions,Procedures	To execute stored routines
+File	File access on server	To read and write files on the server
+Grant option	Databases,Tables,Functions,Procedures	To give to other users those privileges you possess
+Index	Tables	To create or drop indexes
+Insert	Tables	To insert data into tables
+Lock tables	Databases	To use LOCK TABLES (together with SELECT privilege)
+Process	Server Admin	To view the plain text of currently executing queries
+References	Databases,Tables	To have references on tables
+Reload	Server Admin	To reload or refresh tables, logs and privileges
+Replication client	Server Admin	To ask where the slave or master servers are
+Replication slave	Server Admin	To read binary log events from the master
+Select	Tables	To retrieve rows from table
+Show databases	Server Admin	To see all databases with SHOW DATABASES
+Show view	Tables	To see views with SHOW CREATE VIEW
+Shutdown	Server Admin	To shut down the server
+Super	Server Admin	To use KILL thread, SET GLOBAL, CHANGE MASTER, etc.
+Table Maintenance	Tables	To run the table maintenance commands
+Trigger	Tables	To use triggers
+Truncate Table	Tables	To run the TRUNCATE TABLE command
+Update	Tables	To update existing rows
+Usage	Server Admin	No privileges - allow connect only
+show processlist;
+Id	User	Host	db	Command	Time	State	Info
+2	root	localhost	testdb	Query	0	NULL	show processlist
+show full processlist;
+Id	User	Host	db	Command	Time	State	Info
+2	root	localhost	testdb	Query	0	NULL	show full processlist
+show status like 'not%';
+Variable_name	Value
+Not_flushed_delayed_rows	0
+show session status like 'Select%';
+Variable_name	Value
+Select_full_join	0
+Select_full_range_join	0
+Select_range	0
+Select_range_check	0
+Select_scan	26
+show tables;
+Tables_in_testdb
+tbl
+tbl2
+show full tables from testdb;
+Tables_in_testdb	Table_type
+tbl	BASE TABLE
+tbl2	BASE TABLE
+show full tables from testdb like 'tbl';
+Tables_in_testdb (tbl)	Table_type
+tbl	BASE TABLE
+show triggers;
+Trigger	Event	Table	Statement	Timing	Created	sql_mode	Definer	character_set_client	collation_connection	Database Collation
+show triggers from testdb like 'tbl';
+Trigger	Event	Table	Statement	Timing	Created	sql_mode	Definer	character_set_client	collation_connection	Database Collation
+show variables like '%char%';
+Variable_name	Value
+character_set_client	latin1
+character_set_connection	latin1
+character_set_database	latin1
+character_set_filesystem	binary
+character_set_results	latin1
+character_set_server	latin1
+character_set_system	utf8
+character_sets_dir	/home/work/mysql/mysql_encrypt_master/share/mysql/charsets/
+show global variables like '%char%';
+Variable_name	Value
+character_set_client	latin1
+character_set_connection	latin1
+character_set_database	latin1
+character_set_filesystem	binary
+character_set_results	latin1
+character_set_server	latin1
+character_set_system	utf8
+character_sets_dir	/home/work/mysql/mysql_encrypt_master/share/mysql/charsets/
+show warnings;
+Level	Code	Message
+show count(*) warnings;
+@@session.warning_count
+0
+show warnings limit 1,4;
+Level	Code	Message
+show errors;
+Level	Code	Message
+show count(*) errors;
+@@session.error_count
+0
+show errors limit 1,4;
+Level	Code	Message
+flush local hosts;
+flush no_write_to_binlog des_key_file;
+flush no_write_to_binlog logs;
+flush no_write_to_binlog privileges;
+flush no_write_to_binlog query cache;
+flush no_write_to_binlog status;
+flush no_write_to_binlog tables with read lock;
+flush no_write_to_binlog user_resources;
+unlock tables;
+kill connection 2406;
+ERROR HY000: Unknown thread id: 2406
+kill query 2407;
+ERROR HY000: Unknown thread id: 2407
+alter table tbl engine = myisam;
+load index into cache tbl ignore leaves;
+Table	Op	Msg_type	Msg_text
+testdb.tbl	preload_keys	status	OK
+alter table tbl engine = innodb;
+reset master;
+reset query cache;
+reset slave;
+drop database testdb;

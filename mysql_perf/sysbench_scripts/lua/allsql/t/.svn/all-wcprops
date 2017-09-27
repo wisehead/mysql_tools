@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/op-test/!svn/ver/6493/trunk/dba/mysql/bmt/case/mtr/allsql/t
+END
+dcl.test
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/op-test/!svn/ver/5770/trunk/dba/mysql/bmt/case/mtr/allsql/t/dcl.test
+END
+ddl.test
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/op-test/!svn/ver/6353/trunk/dba/mysql/bmt/case/mtr/allsql/t/ddl.test
+END
+dml.test
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/op-test/!svn/ver/6493/trunk/dba/mysql/bmt/case/mtr/allsql/t/dml.test
+END
+rpl.test
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/op-test/!svn/ver/6353/trunk/dba/mysql/bmt/case/mtr/allsql/t/rpl.test
+END

@@ -1,0 +1,2 @@
+mysqladmin shutdown -uroot -proot 
+#mysqladmin --defaults-file=$bpath/etc/user.root.cnf shutdown 

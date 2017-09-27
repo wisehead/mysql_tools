@@ -1,0 +1,332 @@
+include/master-slave.inc
+[connection master]
+show databases;
+Database
+information_schema
+mtr
+mysql
+test
+create database if not exists testdb;
+use testdb;
+SET storage_engine=innodb;
+create table tbl(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7));
+insert tbl values(NULL, 2, 3, 4.4, 5.5, '6', '7', '8', '9');
+insert into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert low_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert high_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+alter table tbl engine=myisam;
+insert delayed into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9');
+alter table tbl engine=innodb;
+insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9');
+insert tbl values(NULL, 1*2, 3+10, 4.4, 5.5, '6', '7', '8', '9');
+insert tbl values(NULL, default, default, default, default, default, default, '8', '9');
+insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9'), (NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9') on duplicate key update col3=values(col3)+values(col3);
+insert low_priority ignore tbl set col2=default, col8='8', col9='9';
+insert high_priority tbl set col2=default, col8='8', col9='9' on duplicate key update col3=values(col3)+100;
+create table tbl2(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7));
+insert tbl2 values(2, 12, 13, 14.4, 15.5, '16', '17', '18', '19');
+insert tbl2 values(10, 22, 23, 24.4, 25.5, '26', '27', '28', '29');
+insert high_priority ignore tbl select * from tbl2;
+insert low_priority ignore tbl(col2, col4, col6, col8, col9) select col2, col4, col6, col8, col9 from tbl2;
+select * from tbl;
+col1	col2	col3	col4	col5	col6	col7	col8	col9
+1	2	3	4.4	5.5	6	7	8	9
+2	2	0	4.4	0	6		8	9
+3	2	0	4.4	0	6		8	9
+4	2	0	4.4	0	6		8	9
+5	2	0	4.4	0	6		8	9
+6	2	0	4.4	0	6		8	9
+7	2	0	4.4	0	6		8	9
+8	2	0	4.4	0	6		8	9
+9	2	0	4.4	0	6		8	9
+10	10	13	4.4	5.5	6	7	8	9
+11	2	13	4.4	5.5	6	7	8	9
+12	0	0	0	0			8	9
+13	10	13	4.4	5.5	6	7	8	9
+14	10	13	4.4	5.5	6	7	8	9
+15	0	0	0	0			8	9
+16	0	0	0	0			8	9
+17	12	0	14.4	0	16		18	19
+18	22	0	24.4	0	26		28	29
+show databases;
+Database
+information_schema
+mtr
+mysql
+test
+testdb
+use testdb;
+select * from tbl;
+col1	col2	col3	col4	col5	col6	col7	col8	col9
+1	2	3	4.4	5.5	6	7	8	9
+2	2	0	4.4	0	6		8	9
+3	2	0	4.4	0	6		8	9
+4	2	0	4.4	0	6		8	9
+5	2	0	4.4	0	6		8	9
+6	2	0	4.4	0	6		8	9
+7	2	0	4.4	0	6		8	9
+8	2	0	4.4	0	6		8	9
+9	2	0	4.4	0	6		8	9
+10	10	13	4.4	5.5	6	7	8	9
+11	2	13	4.4	5.5	6	7	8	9
+12	0	0	0	0			8	9
+13	10	13	4.4	5.5	6	7	8	9
+14	10	13	4.4	5.5	6	7	8	9
+15	0	0	0	0			8	9
+16	0	0	0	0			8	9
+17	12	0	14.4	0	16		18	19
+18	22	0	24.4	0	26		28	29
+show master status;
+File	Position	Binlog_Do_DB	Binlog_Ignore_DB	Group_ID
+master-bin.000001	5729			NULL
+purge master logs to 'master-bin.000001';
+purge binary logs before '2011-08-09 09:58:00';
+set sql_log_bin = 0;
+set sql_log_bin = 1;
+show binlog events;
+Log_name	Pos	Event_type	Server_id	End_log_pos	Group_ID	Info
+master-bin.000001	4	Format_desc	1	106	0	Server ver: 5.1.63-secdb-1.1.5.0-log, Binlog ver: 4
+master-bin.000001	106	Query	1	207	0	create database if not exists testdb
+master-bin.000001	207	Query	1	706	0	use `testdb`; create table tbl(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7))
+master-bin.000001	706	Query	1	776	0	BEGIN
+master-bin.000001	776	Intvar	1	804	0	INSERT_ID=1
+master-bin.000001	804	Query	1	928	0	use `testdb`; insert tbl values(NULL, 2, 3, 4.4, 5.5, '6', '7', '8', '9')
+master-bin.000001	928	Xid	1	955	0	COMMIT /* xid=148 */
+master-bin.000001	955	Query	1	1025	0	BEGIN
+master-bin.000001	1025	Intvar	1	1053	0	INSERT_ID=2
+master-bin.000001	1053	Query	1	1193	0	use `testdb`; insert into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	1193	Xid	1	1220	0	COMMIT /* xid=149 */
+master-bin.000001	1220	Query	1	1290	0	BEGIN
+master-bin.000001	1290	Intvar	1	1318	0	INSERT_ID=3
+master-bin.000001	1318	Query	1	1471	0	use `testdb`; insert low_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	1471	Xid	1	1498	0	COMMIT /* xid=150 */
+master-bin.000001	1498	Query	1	1568	0	BEGIN
+master-bin.000001	1568	Intvar	1	1596	0	INSERT_ID=4
+master-bin.000001	1596	Query	1	1750	0	use `testdb`; insert high_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	1750	Xid	1	1777	0	COMMIT /* xid=151 */
+master-bin.000001	1777	Query	1	1871	0	use `testdb`; alter table tbl engine=myisam
+master-bin.000001	1871	Intvar	1	1899	0	INSERT_ID=5
+master-bin.000001	1899	Query	1	2047	0	use `testdb`; insert delayed into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	2047	Intvar	1	2075	0	INSERT_ID=6
+master-bin.000001	2075	Query	1	2230	0	use `testdb`; insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	2230	Intvar	1	2258	0	INSERT_ID=7
+master-bin.000001	2258	Query	1	2463	0	use `testdb`; insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9')
+master-bin.000001	2463	Query	1	2557	0	use `testdb`; alter table tbl engine=innodb
+master-bin.000001	2557	Query	1	2627	0	BEGIN
+master-bin.000001	2627	Intvar	1	2655	0	INSERT_ID=10
+master-bin.000001	2655	Query	1	2788	0	use `testdb`; insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9')
+master-bin.000001	2788	Xid	1	2815	0	COMMIT /* xid=157 */
+master-bin.000001	2815	Query	1	2885	0	BEGIN
+master-bin.000001	2885	Intvar	1	2913	0	INSERT_ID=11
+master-bin.000001	2913	Query	1	3042	0	use `testdb`; insert tbl values(NULL, 1*2, 3+10, 4.4, 5.5, '6', '7', '8', '9')
+master-bin.000001	3042	Xid	1	3069	0	COMMIT /* xid=158 */
+master-bin.000001	3069	Query	1	3139	0	BEGIN
+master-bin.000001	3139	Intvar	1	3167	0	INSERT_ID=12
+master-bin.000001	3167	Query	1	3319	0	use `testdb`; insert tbl values(NULL, default, default, default, default, default, default, '8', '9')
+master-bin.000001	3319	Xid	1	3346	0	COMMIT /* xid=159 */
+master-bin.000001	3346	Query	1	3416	0	BEGIN
+master-bin.000001	3416	Intvar	1	3444	0	INSERT_ID=13
+master-bin.000001	3444	Query	1	3685	0	use `testdb`; insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9'), (NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9') on duplicate key update col3=values(col3)+values(col3)
+master-bin.000001	3685	Xid	1	3712	0	COMMIT /* xid=160 */
+master-bin.000001	3712	Query	1	3782	0	BEGIN
+master-bin.000001	3782	Intvar	1	3810	0	INSERT_ID=15
+master-bin.000001	3810	Query	1	3942	0	use `testdb`; insert low_priority ignore tbl set col2=default, col8='8', col9='9'
+master-bin.000001	3942	Xid	1	3969	0	COMMIT /* xid=161 */
+master-bin.000001	3969	Query	1	4039	0	BEGIN
+master-bin.000001	4039	Intvar	1	4067	0	INSERT_ID=16
+master-bin.000001	4067	Query	1	4239	0	use `testdb`; insert high_priority tbl set col2=default, col8='8', col9='9' on duplicate key update col3=values(col3)+100
+master-bin.000001	4239	Xid	1	4266	0	COMMIT /* xid=162 */
+master-bin.000001	4266	Query	1	4766	0	use `testdb`; create table tbl2(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7))
+master-bin.000001	4766	Query	1	4836	0	BEGIN
+master-bin.000001	4836	Query	1	4966	0	use `testdb`; insert tbl2 values(2, 12, 13, 14.4, 15.5, '16', '17', '18', '19')
+master-bin.000001	4966	Xid	1	4993	0	COMMIT /* xid=164 */
+master-bin.000001	4993	Query	1	5063	0	BEGIN
+master-bin.000001	5063	Query	1	5194	0	use `testdb`; insert tbl2 values(10, 22, 23, 24.4, 25.5, '26', '27', '28', '29')
+master-bin.000001	5194	Xid	1	5221	0	COMMIT /* xid=165 */
+master-bin.000001	5221	Query	1	5291	0	BEGIN
+master-bin.000001	5291	Query	1	5406	0	use `testdb`; insert high_priority ignore tbl select * from tbl2
+master-bin.000001	5406	Xid	1	5433	0	COMMIT /* xid=166 */
+master-bin.000001	5433	Query	1	5503	0	BEGIN
+master-bin.000001	5503	Intvar	1	5531	0	INSERT_ID=17
+master-bin.000001	5531	Query	1	5702	0	use `testdb`; insert low_priority ignore tbl(col2, col4, col6, col8, col9) select col2, col4, col6, col8, col9 from tbl2
+master-bin.000001	5702	Xid	1	5729	0	COMMIT /* xid=167 */
+show binlog events in 'master-bin.000001';
+Log_name	Pos	Event_type	Server_id	End_log_pos	Group_ID	Info
+master-bin.000001	4	Format_desc	1	106	0	Server ver: 5.1.63-secdb-1.1.5.0-log, Binlog ver: 4
+master-bin.000001	106	Query	1	207	0	create database if not exists testdb
+master-bin.000001	207	Query	1	706	0	use `testdb`; create table tbl(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7))
+master-bin.000001	706	Query	1	776	0	BEGIN
+master-bin.000001	776	Intvar	1	804	0	INSERT_ID=1
+master-bin.000001	804	Query	1	928	0	use `testdb`; insert tbl values(NULL, 2, 3, 4.4, 5.5, '6', '7', '8', '9')
+master-bin.000001	928	Xid	1	955	0	COMMIT /* xid=148 */
+master-bin.000001	955	Query	1	1025	0	BEGIN
+master-bin.000001	1025	Intvar	1	1053	0	INSERT_ID=2
+master-bin.000001	1053	Query	1	1193	0	use `testdb`; insert into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	1193	Xid	1	1220	0	COMMIT /* xid=149 */
+master-bin.000001	1220	Query	1	1290	0	BEGIN
+master-bin.000001	1290	Intvar	1	1318	0	INSERT_ID=3
+master-bin.000001	1318	Query	1	1471	0	use `testdb`; insert low_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	1471	Xid	1	1498	0	COMMIT /* xid=150 */
+master-bin.000001	1498	Query	1	1568	0	BEGIN
+master-bin.000001	1568	Intvar	1	1596	0	INSERT_ID=4
+master-bin.000001	1596	Query	1	1750	0	use `testdb`; insert high_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	1750	Xid	1	1777	0	COMMIT /* xid=151 */
+master-bin.000001	1777	Query	1	1871	0	use `testdb`; alter table tbl engine=myisam
+master-bin.000001	1871	Intvar	1	1899	0	INSERT_ID=5
+master-bin.000001	1899	Query	1	2047	0	use `testdb`; insert delayed into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	2047	Intvar	1	2075	0	INSERT_ID=6
+master-bin.000001	2075	Query	1	2230	0	use `testdb`; insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	2230	Intvar	1	2258	0	INSERT_ID=7
+master-bin.000001	2258	Query	1	2463	0	use `testdb`; insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9')
+master-bin.000001	2463	Query	1	2557	0	use `testdb`; alter table tbl engine=innodb
+master-bin.000001	2557	Query	1	2627	0	BEGIN
+master-bin.000001	2627	Intvar	1	2655	0	INSERT_ID=10
+master-bin.000001	2655	Query	1	2788	0	use `testdb`; insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9')
+master-bin.000001	2788	Xid	1	2815	0	COMMIT /* xid=157 */
+master-bin.000001	2815	Query	1	2885	0	BEGIN
+master-bin.000001	2885	Intvar	1	2913	0	INSERT_ID=11
+master-bin.000001	2913	Query	1	3042	0	use `testdb`; insert tbl values(NULL, 1*2, 3+10, 4.4, 5.5, '6', '7', '8', '9')
+master-bin.000001	3042	Xid	1	3069	0	COMMIT /* xid=158 */
+master-bin.000001	3069	Query	1	3139	0	BEGIN
+master-bin.000001	3139	Intvar	1	3167	0	INSERT_ID=12
+master-bin.000001	3167	Query	1	3319	0	use `testdb`; insert tbl values(NULL, default, default, default, default, default, default, '8', '9')
+master-bin.000001	3319	Xid	1	3346	0	COMMIT /* xid=159 */
+master-bin.000001	3346	Query	1	3416	0	BEGIN
+master-bin.000001	3416	Intvar	1	3444	0	INSERT_ID=13
+master-bin.000001	3444	Query	1	3685	0	use `testdb`; insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9'), (NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9') on duplicate key update col3=values(col3)+values(col3)
+master-bin.000001	3685	Xid	1	3712	0	COMMIT /* xid=160 */
+master-bin.000001	3712	Query	1	3782	0	BEGIN
+master-bin.000001	3782	Intvar	1	3810	0	INSERT_ID=15
+master-bin.000001	3810	Query	1	3942	0	use `testdb`; insert low_priority ignore tbl set col2=default, col8='8', col9='9'
+master-bin.000001	3942	Xid	1	3969	0	COMMIT /* xid=161 */
+master-bin.000001	3969	Query	1	4039	0	BEGIN
+master-bin.000001	4039	Intvar	1	4067	0	INSERT_ID=16
+master-bin.000001	4067	Query	1	4239	0	use `testdb`; insert high_priority tbl set col2=default, col8='8', col9='9' on duplicate key update col3=values(col3)+100
+master-bin.000001	4239	Xid	1	4266	0	COMMIT /* xid=162 */
+master-bin.000001	4266	Query	1	4766	0	use `testdb`; create table tbl2(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7))
+master-bin.000001	4766	Query	1	4836	0	BEGIN
+master-bin.000001	4836	Query	1	4966	0	use `testdb`; insert tbl2 values(2, 12, 13, 14.4, 15.5, '16', '17', '18', '19')
+master-bin.000001	4966	Xid	1	4993	0	COMMIT /* xid=164 */
+master-bin.000001	4993	Query	1	5063	0	BEGIN
+master-bin.000001	5063	Query	1	5194	0	use `testdb`; insert tbl2 values(10, 22, 23, 24.4, 25.5, '26', '27', '28', '29')
+master-bin.000001	5194	Xid	1	5221	0	COMMIT /* xid=165 */
+master-bin.000001	5221	Query	1	5291	0	BEGIN
+master-bin.000001	5291	Query	1	5406	0	use `testdb`; insert high_priority ignore tbl select * from tbl2
+master-bin.000001	5406	Xid	1	5433	0	COMMIT /* xid=166 */
+master-bin.000001	5433	Query	1	5503	0	BEGIN
+master-bin.000001	5503	Intvar	1	5531	0	INSERT_ID=17
+master-bin.000001	5531	Query	1	5702	0	use `testdb`; insert low_priority ignore tbl(col2, col4, col6, col8, col9) select col2, col4, col6, col8, col9 from tbl2
+master-bin.000001	5702	Xid	1	5729	0	COMMIT /* xid=167 */
+show binlog events from 106;
+Log_name	Pos	Event_type	Server_id	End_log_pos	Group_ID	Info
+master-bin.000001	106	Query	1	207	0	create database if not exists testdb
+master-bin.000001	207	Query	1	706	0	use `testdb`; create table tbl(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7))
+master-bin.000001	706	Query	1	776	0	BEGIN
+master-bin.000001	776	Intvar	1	804	0	INSERT_ID=1
+master-bin.000001	804	Query	1	928	0	use `testdb`; insert tbl values(NULL, 2, 3, 4.4, 5.5, '6', '7', '8', '9')
+master-bin.000001	928	Xid	1	955	0	COMMIT /* xid=148 */
+master-bin.000001	955	Query	1	1025	0	BEGIN
+master-bin.000001	1025	Intvar	1	1053	0	INSERT_ID=2
+master-bin.000001	1053	Query	1	1193	0	use `testdb`; insert into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	1193	Xid	1	1220	0	COMMIT /* xid=149 */
+master-bin.000001	1220	Query	1	1290	0	BEGIN
+master-bin.000001	1290	Intvar	1	1318	0	INSERT_ID=3
+master-bin.000001	1318	Query	1	1471	0	use `testdb`; insert low_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	1471	Xid	1	1498	0	COMMIT /* xid=150 */
+master-bin.000001	1498	Query	1	1568	0	BEGIN
+master-bin.000001	1568	Intvar	1	1596	0	INSERT_ID=4
+master-bin.000001	1596	Query	1	1750	0	use `testdb`; insert high_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	1750	Xid	1	1777	0	COMMIT /* xid=151 */
+master-bin.000001	1777	Query	1	1871	0	use `testdb`; alter table tbl engine=myisam
+master-bin.000001	1871	Intvar	1	1899	0	INSERT_ID=5
+master-bin.000001	1899	Query	1	2047	0	use `testdb`; insert delayed into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	2047	Intvar	1	2075	0	INSERT_ID=6
+master-bin.000001	2075	Query	1	2230	0	use `testdb`; insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9')
+master-bin.000001	2230	Intvar	1	2258	0	INSERT_ID=7
+master-bin.000001	2258	Query	1	2463	0	use `testdb`; insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9')
+master-bin.000001	2463	Query	1	2557	0	use `testdb`; alter table tbl engine=innodb
+master-bin.000001	2557	Query	1	2627	0	BEGIN
+master-bin.000001	2627	Intvar	1	2655	0	INSERT_ID=10
+master-bin.000001	2655	Query	1	2788	0	use `testdb`; insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9')
+master-bin.000001	2788	Xid	1	2815	0	COMMIT /* xid=157 */
+master-bin.000001	2815	Query	1	2885	0	BEGIN
+master-bin.000001	2885	Intvar	1	2913	0	INSERT_ID=11
+master-bin.000001	2913	Query	1	3042	0	use `testdb`; insert tbl values(NULL, 1*2, 3+10, 4.4, 5.5, '6', '7', '8', '9')
+master-bin.000001	3042	Xid	1	3069	0	COMMIT /* xid=158 */
+master-bin.000001	3069	Query	1	3139	0	BEGIN
+master-bin.000001	3139	Intvar	1	3167	0	INSERT_ID=12
+master-bin.000001	3167	Query	1	3319	0	use `testdb`; insert tbl values(NULL, default, default, default, default, default, default, '8', '9')
+master-bin.000001	3319	Xid	1	3346	0	COMMIT /* xid=159 */
+master-bin.000001	3346	Query	1	3416	0	BEGIN
+master-bin.000001	3416	Intvar	1	3444	0	INSERT_ID=13
+master-bin.000001	3444	Query	1	3685	0	use `testdb`; insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9'), (NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9') on duplicate key update col3=values(col3)+values(col3)
+master-bin.000001	3685	Xid	1	3712	0	COMMIT /* xid=160 */
+master-bin.000001	3712	Query	1	3782	0	BEGIN
+master-bin.000001	3782	Intvar	1	3810	0	INSERT_ID=15
+master-bin.000001	3810	Query	1	3942	0	use `testdb`; insert low_priority ignore tbl set col2=default, col8='8', col9='9'
+master-bin.000001	3942	Xid	1	3969	0	COMMIT /* xid=161 */
+master-bin.000001	3969	Query	1	4039	0	BEGIN
+master-bin.000001	4039	Intvar	1	4067	0	INSERT_ID=16
+master-bin.000001	4067	Query	1	4239	0	use `testdb`; insert high_priority tbl set col2=default, col8='8', col9='9' on duplicate key update col3=values(col3)+100
+master-bin.000001	4239	Xid	1	4266	0	COMMIT /* xid=162 */
+master-bin.000001	4266	Query	1	4766	0	use `testdb`; create table tbl2(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7))
+master-bin.000001	4766	Query	1	4836	0	BEGIN
+master-bin.000001	4836	Query	1	4966	0	use `testdb`; insert tbl2 values(2, 12, 13, 14.4, 15.5, '16', '17', '18', '19')
+master-bin.000001	4966	Xid	1	4993	0	COMMIT /* xid=164 */
+master-bin.000001	4993	Query	1	5063	0	BEGIN
+master-bin.000001	5063	Query	1	5194	0	use `testdb`; insert tbl2 values(10, 22, 23, 24.4, 25.5, '26', '27', '28', '29')
+master-bin.000001	5194	Xid	1	5221	0	COMMIT /* xid=165 */
+master-bin.000001	5221	Query	1	5291	0	BEGIN
+master-bin.000001	5291	Query	1	5406	0	use `testdb`; insert high_priority ignore tbl select * from tbl2
+master-bin.000001	5406	Xid	1	5433	0	COMMIT /* xid=166 */
+master-bin.000001	5433	Query	1	5503	0	BEGIN
+master-bin.000001	5503	Intvar	1	5531	0	INSERT_ID=17
+master-bin.000001	5531	Query	1	5702	0	use `testdb`; insert low_priority ignore tbl(col2, col4, col6, col8, col9) select col2, col4, col6, col8, col9 from tbl2
+master-bin.000001	5702	Xid	1	5729	0	COMMIT /* xid=167 */
+show binlog events from 106 limit 1;
+Log_name	Pos	Event_type	Server_id	End_log_pos	Group_ID	Info
+master-bin.000001	106	Query	1	207	0	create database if not exists testdb
+show binary logs;
+Log_name	File_size	Group_ID
+master-bin.000001	5729	0
+show slave hosts;
+Server_id	Host	Port	Rpl_recovery_rank	Master_id
+2	127.0.0.1	13001	0	1
+drop database testdb;
+reset master;
+show master status;
+File	Position	Binlog_Do_DB	Binlog_Ignore_DB	Group_ID
+slave-bin.000001	106			NULL
+stop slave;
+reset slave;
+set global sql_slave_skip_counter=3;
+change master to master_host='127.0.0.1', master_port=13000,master_user='root',master_password='',master_log_file='master-bin.000001',master_log_pos=106;
+start slave io_thread;
+start slave sql_thread;
+stop slave;
+start slave;
+stop slave sql_thread;
+start slave sql_thread until master_log_file='master-bin.000001',master_log_pos=106;
+select sleep(1);
+sleep(1)
+0
+stop slave sql_thread;
+Warnings:
+Note	1255	Slave already has been stopped
+start slave sql_thread until relay_log_file='relay-bin.0000001',relay_log_pos=106;
+select sleep(1);
+sleep(1)
+0
+show slave status;
+Slave_IO_State	Master_Host	Master_User	Master_Port	Connect_Retry	Master_Log_File	Read_Master_Log_Pos	Relay_Log_File	Relay_Log_Pos	Relay_Master_Log_File	Slave_IO_Running	Slave_SQL_Running	Replicate_Do_DB	Replicate_Ignore_DB	Replicate_Do_Table	Replicate_Ignore_Table	Replicate_Wild_Do_Table	Replicate_Wild_Ignore_Table	Last_Errno	Last_Error	Skip_Counter	Exec_Master_Log_Pos	Relay_Log_Space	Until_Condition	Until_Log_File	Until_Log_Pos	Master_SSL_Allowed	Master_SSL_CA_File	Master_SSL_CA_Path	Master_SSL_Cert	Master_SSL_Cipher	Master_SSL_Key	Seconds_Behind_Master	Master_SSL_Verify_Server_Cert	Last_IO_Errno	Last_IO_Error	Last_SQL_Errno	Last_SQL_Error	Semi_Sync_Group	Exec_Master_Group_ID	Connect_Using_Group_ID
+Waiting for master to send event	127.0.0.1	root	13000	1	master-bin.000001	5814	slave-relay-bin.000001	4	master-bin.000001	Yes	No							0		0	106	6115	Relay	relay-bin.0000001	106	No						NULL	No	0		0			NULL	No
+load data from master;
+Warnings:
+Warning	1287	'LOAD DATA FROM MASTER' is deprecated and will be removed in a future release. Please use mysqldump or future BACKUP/RESTORE DATABASE facility instead
+Note	1007	Can't create database 'mtr'; database exists
+Note	1007	Can't create database 'test'; database exists
+load table tbl from master;
+ERROR HY000: Error from master: 'Table 'testdb.tbl' doesn't exist'
+stop slave;
