@@ -499,30 +499,30 @@ void process_ibpage(page_t *page) {
 			if (check_for_a_record(page, origin, table, offsets) && check_constraints(origin, table, offsets)) {
 				if (debug) printf("\n---------------------------------------------------\n"
 			       			  "PAGE%lu: Found a table %s record: %p (offset = %lu)\n", \
-						  page_id, table->name, origin, offset);
-                		if(is_page_valid){
-					process_ibrec(page, origin, table, offsets);
-                    			b = mach_read_from_2(page + offset - 2);
-					offset = (comp) ? offset + b : b;
-                    			}
-				else{
+							  page_id, table->name, origin, offset);
+            	if(is_page_valid){
+						process_ibrec(page, origin, table, offsets);
+            			b = mach_read_from_2(page + offset - 2);
+						offset = (comp) ? offset + b : b;
+            	}
+ 				else{
 					offset += process_ibrec(page, origin, table, offsets);
-                    			}
-                		if (debug) printf("Next offset: 0x%lX", offset);
-			   		break;
-		        	}
-            		else{
-                		if(is_page_valid){
+            	}
+            	if (debug) printf("Next offset: 0x%lX", offset);
+					break;
+			}
+        	else{
+        		if(is_page_valid){
 					b = mach_read_from_2(page + offset - 2);
 					offset = (comp) ? offset + b : b;
-                    			}
+        		}
 				else{
 					offset++;
-					}
-                		if (debug) printf("\nNext offset: %lX", offset);
-               			}
-			}
+				}
+        		if (debug) printf("\nNext offset: %lX", offset);
+        	}
 		}
+	}
 }
 
 /*******************************************************************/

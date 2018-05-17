@@ -1,0 +1,5 @@
+rm tags
+rm cscope.*
+find . -name "*.h" -o -name "*.c" -o -name "*.cc" -o -name "*.cpp" -o -name "*.ic" -o -name "*.hpp" -o -name "*.cxx" -o -name "*.hxx"  -o -name "*.i"> cscope.files
+cscope -bq -i cscope.files
+ctags -R

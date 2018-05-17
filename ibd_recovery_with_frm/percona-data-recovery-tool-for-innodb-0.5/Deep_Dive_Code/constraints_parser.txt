@@ -1,0 +1,17 @@
+main
+--while(NULL != (de = readdir(src_dir))){
+--open_ibfile
+--process_ibfile
+----init_table_defs
+----process_ibpage
+------check_page_format
+--------page_is_comp
+----------page_header_get_field(page, PAGE_N_HEAP) & 0x8000
+------------mach_read_from_2(page + PAGE_HEADER + field)
+------check_page
+--------check_for_a_record
+----------rec_get_deleted_flag
+----------ibrec_init_offsets_new
+
+
+
