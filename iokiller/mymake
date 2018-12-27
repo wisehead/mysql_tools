@@ -1,0 +1,1 @@
+gcc -o iokiller -g -O0 -lpthread main.c

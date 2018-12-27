@@ -1,0 +1,1 @@
+hexdump -n 16384 -C -s 16384 -v datafile

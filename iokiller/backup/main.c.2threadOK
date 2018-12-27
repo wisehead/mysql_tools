@@ -1,0 +1,265 @@
+/*******************************************************************************
+ *      File Name: main.c                                               
+ *         Author: Hui Chen. (c) 2015                             
+ *           Mail: chenhui13@baidu.com                                        
+ *   Created Time: 2015/05/21-19:45                                    
+ *	Modified Time: 2015/05/21-19:45                                    
+ *******************************************************************************/
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <time.h>
+
+
+#define BUF_MAX_LEN_16K 16384
+#define FIL_MAX_SIZ_1G  1073741824 
+#define FIL_MAX_SIZ_500M  536870912 
+#define PAG_COUNT_IN_FILE 65536
+
+#define UNIV_PAGE_SIZE 16384
+#define CHECKSUM_LEN 8
+
+typedef unsigned char byte;
+typedef unsigned long int   ulint;
+#define UT_HASH_RANDOM_MASK 1463735687
+#define UT_HASH_RANDOM_MASK2    1653893711
+
+#define MAX 3
+
+pthread_t id[2];
+pthread_mutex_t mut; //初始化静态互斥锁
+int number = 0;
+char buf[BUF_MAX_LEN_16K*10] = {0};
+int fd;
+
+ulint buf_calc_page_new_checksum(const byte* page);
+
+void thread1(void)
+{
+    int i;
+    printf("Hello,I am pthread1!\n");
+    
+    while(1)
+    {
+        rand_write(fd, &buf[0], 0, FIL_MAX_SIZ_500M);
+        if(is_the_file_corrupt(fd, &buf[0], 0, FIL_MAX_SIZ_500M))
+            break;
+    }
+    pthread_exit(NULL); //线程通过执行此函数，终止执行。返回是一个空指针类型
+}
+
+void thread2(void)
+{
+    int j;
+    printf("Hello,I'm pthread2\n");
+    while(1)
+    {
+        rand_write(fd, &buf[BUF_MAX_LEN_16K], FIL_MAX_SIZ_500M, FIL_MAX_SIZ_1G);
+        if(is_the_file_corrupt(fd, &buf[BUF_MAX_LEN_16K], FIL_MAX_SIZ_500M, FIL_MAX_SIZ_1G))
+            break;
+    }
+    pthread_exit(NULL);
+}
+
+void thread_create(void)
+{
+    int temp;
+    memset(&id, 0, sizeof(id));
+    if(temp = pthread_create(&id[0], NULL, (void *)thread1, NULL)!= 0)
+        printf("Thread 1 fail to create!\n");
+    else
+        printf("Thread 1 created\n");
+    if(temp = pthread_create(&id[1], NULL, (void *)thread2, NULL)!= 0)
+        printf("Thread 2 fail to create!\n");
+    else
+        printf("Thread 2 created!\n");
+}
+
+void thread_wait()
+{
+    if(id[0] != 0)
+    {
+        pthread_join(id[0], NULL); //等待线程结束，使用此函数对创建的线程资源回收
+        printf("Thread1 completed!\n");
+    }
+    if(id[1] != 0)
+    {
+        pthread_join(id[1], NULL);
+        printf("Thread2 completed!\n");
+    }
+}
+
+int main(void)
+{
+    int i,ret1,ret2;
+    pthread_mutex_init(&mut, NULL); //动态互斥锁
+
+    fd = open("./datafile",O_CREAT|O_RDWR|O_TRUNC,S_IRWXU);
+    for (i=0; i<PAG_COUNT_IN_FILE; i++)
+    {
+        write_page(fd, i, buf);
+    }
+
+    printf("Main fuction,creating thread...\n");
+    thread_create();
+    printf("Main fuction, waiting for the pthread end!\n");
+    thread_wait();
+    close(fd);
+    return (0);
+
+}
+
+int read_page(int fd, int page, char* buf)
+{
+  //printf("in read_page()\n");
+  int ret_offset, ret;
+  int offs = page * BUF_MAX_LEN_16K;
+  ulint stored_checksum, calculated_checksum;
+  ulint* ptr;
+
+  ret = pread(fd, buf, (ssize_t) (BUF_MAX_LEN_16K), offs);
+  if (ret < 0)
+  {
+      printf(" in read_page, read error\n");
+      return ret;
+  }
+  
+  ptr = (ulint *)&buf[UNIV_PAGE_SIZE - CHECKSUM_LEN];
+  stored_checksum = *ptr;
+  calculated_checksum = buf_calc_page_new_checksum(buf);
+  if (stored_checksum != calculated_checksum)
+  {
+    printf("stored checksum = %d,  calculated checksum = %d\n",stored_checksum, calculated_checksum);
+    ret = -1;
+  }  
+  if (ret >=0 )
+    ret = 0;
+  return ret;
+}
+
+int is_the_file_corrupt(int fd, char* buf, int start, int end)
+{
+    int i, j, ret=0, j_start, j_end;
+    j_start = start/UNIV_PAGE_SIZE;
+    j_end = end/UNIV_PAGE_SIZE;
+    printf("=== in is_the_file_corrupt. j_start=%d, j_end=%d\n",j_start,j_end);
+    for (j=j_start; j<j_end; j++)
+    {  
+        if( read_page(fd, j, buf))
+            return -1;
+    }
+    return ret;
+}
+
+int write_page(int fd, int page, char* buf)
+{
+  //printf("in write_page(), page num = %d\n", page);
+  int ret_offset, ret;
+  int offs = page * BUF_MAX_LEN_16K;
+  ret = pwrite(fd, buf, (ssize_t) (BUF_MAX_LEN_16K), offs);
+  return ret;
+}
+
+int rand_write(int fd, char* buf, int start, int end)
+{
+    int i, j, j_start, j_end;
+    j_start = start/UNIV_PAGE_SIZE;
+    j_end = end/UNIV_PAGE_SIZE;
+    ulint checksum;
+    ulint* ptr=NULL;
+    //fd = open("./datafile", O_WRONLY|O_CREAT);
+    for (i=0; i<BUF_MAX_LEN_16K; i++)
+    {
+        buf[i] = 1;
+        checksum = buf_calc_page_new_checksum(buf);
+        printf("checksum = %d\n",checksum);
+        ptr = (ulint *)&buf[UNIV_PAGE_SIZE - CHECKSUM_LEN];
+        *ptr = checksum;
+        printf("========== in rand_write, changing byte = %d ============\n", i);
+        //for (j=0; j<PAG_COUNT_IN_FILE; j++)
+        for (j=j_start; j<j_end; j++)
+        {   
+            write_page(fd, j, buf);
+        }
+    }   
+    //close(fd); 
+}
+
+
+
+
+
+ulint
+ut_fold_ulint_pair(
+/*===============*/
+    ulint   n1, /*!< in: ulint */
+    ulint   n2) /*!< in: ulint */
+{
+    return(((((n1 ^ n2 ^ UT_HASH_RANDOM_MASK2) << 8) + n1)
+        ^ UT_HASH_RANDOM_MASK) + n2);
+}
+
+ulint
+ut_fold_binary(
+/*===========*/
+    const byte* str,    /*!< in: string of bytes */
+    ulint       len)    /*!< in: length */
+{
+    ulint       fold = 0;
+    const byte* str_end = str + (len & 0xFFFFFFF8);
+
+    //ut_ad(str || !len);
+
+    while (str < str_end) {
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+    }
+
+    switch (len & 0x7) {
+    case 7:
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+    case 6:
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+    case 5:
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+    case 4:
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+    case 3:
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+    case 2:
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+    case 1:
+        fold = ut_fold_ulint_pair(fold, (ulint)(*str++));
+    }
+
+    return(fold);
+}
+
+
+
+ulint
+buf_calc_page_new_checksum(
+/*=======================*/
+    const byte* page)   /*!< in: buffer page */
+{
+    ulint checksum;
+
+    checksum = ut_fold_binary(page,
+                  UNIV_PAGE_SIZE - CHECKSUM_LEN);
+    //checksum = checksum & 0xFFFFFFFFUL;
+
+    return(checksum);
+}
+
+

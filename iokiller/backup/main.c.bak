@@ -1,0 +1,55 @@
+/*******************************************************************************
+ *      File Name: main.c                                               
+ *         Author: Hui Chen. (c) 2015                             
+ *           Mail: chenhui13@baidu.com                                        
+ *   Created Time: 2015/05/21-18:46                                    
+ *	Modified Time: 2015/05/21-18:46                                    
+ *******************************************************************************/
+#include <stdio.h>
+#define BUF_MAX_LEN_16K 16384
+#define FIL_MAX_SIZ_1G  1073741824  
+
+int main(int argc, char* argv[])
+{
+    char ch;
+    FILE *fp;
+    int i;
+    char buf[BUF_MAX_LEN_16K];    
+    fp = fopen("./datafile","w");
+
+    for(i=0;i<BUF_MAX_LEN_16K;i++)//数组的值将不确定，也算是随机生成了
+      fputc(0,fp);
+
+
+ //   if((fp=fopen(argv[1],"r"))==NULL) /* 打开一个由argv[1]所指的文件*/
+ //   {
+ //       printf("not open");
+ //       return 0;
+ //   }
+
+ //   while ((ch=fgetc(fp))!=EOF) /* 从文件读一字符，显示到屏幕*/ {
+ //       putchar(ch); // 如果同时打印  printf("(%d)",ch); putchar就不能正确显示中文了
+ //   }
+
+    fclose(fp);
+    printf("Hello World!\n");
+    return 0;
+}
+
+int init_file()
+{
+  printf("in init_file()\n");
+}
+/*
+int read_page(int page)
+{
+  printf("in read_page()\n");
+  buf[100]={};
+  int n=100;
+  int offs=100;
+  FILE *fp;
+  fp = fopen("./datafile","w");
+  pwrite(file, buf, (ssize_t) n, offs);
+  fclose(fp);
+}
+*/
