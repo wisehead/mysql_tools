@@ -1,0 +1,37 @@
+1.重要数据结构
+static sb_operations_t lua_ops = {
+   .init = sb_lua_op_init,
+   .thread_init = sb_lua_op_thread_init,
+   .thread_done = sb_lua_op_thread_done,
+   .report_intermediate = db_report_intermediate,
+   .report_cumulative = db_report_cumulative,
+   .done = sb_lua_op_done
+};
+
+2.sb_load_lua
+
+sb_load_lua
+--sb_lua_new_state
+--read_cmdline_options
+--func_available(gstate, PREPARE_FUNC))
+--func_available(gstate, CLEANUP_FUNC)
+--func_available(gstate, HELP_FUNC)
+--sbtest.ops = lua_ops;
+--func_available(gstate, THREAD_RUN_FUNC)
+--sb_lua_hook_defined(gstate, REPORT_INTERMEDIATE_HOOK)
+--sb_lua_hook_defined(gstate, REPORT_CUMULATIVE_HOOK)
+--states = (lua_State **)calloc(sb_globals.threads, sizeof(lua_State *));
+--sb_lua_done
+
+
+3.
+
+
+
+
+
+
+
+
+
+
