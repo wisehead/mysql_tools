@@ -10,23 +10,52 @@ static sb_operations_t lua_ops = {
 
 2.sb_load_lua
 
-sb_load_lua
---sb_lua_new_state
---read_cmdline_options
---func_available(gstate, PREPARE_FUNC))
---func_available(gstate, CLEANUP_FUNC)
---func_available(gstate, HELP_FUNC)
---sbtest.ops = lua_ops;
---func_available(gstate, THREAD_RUN_FUNC)
---sb_lua_hook_defined(gstate, REPORT_INTERMEDIATE_HOOK)
---sb_lua_hook_defined(gstate, REPORT_CUMULATIVE_HOOK)
---states = (lua_State **)calloc(sb_globals.threads, sizeof(lua_State *));
---sb_lua_done
+main
+--sb_load_lua
+----sb_lua_new_state
+----read_cmdline_options
+----func_available(gstate, PREPARE_FUNC))
+----func_available(gstate, CLEANUP_FUNC)
+----func_available(gstate, HELP_FUNC)
+----sbtest.ops = lua_ops;
+----func_available(gstate, THREAD_RUN_FUNC)
+----sb_lua_hook_defined(gstate, REPORT_INTERMEDIATE_HOOK)
+----sb_lua_hook_defined(gstate, REPORT_CUMULATIVE_HOOK)
+----states = (lua_State **)calloc(sb_globals.threads, sizeof(lua_State *));
+----sb_lua_done
 
 
-3.
+3.main
+
+main
+--sb_options_init
+--log_register
+--register_tests
+--parse_general_arguments
+--sb_get_value_flag("help")
+--sb_get_value_flag("version")
+--init() || log_init() || sb_counters_init()
+--find_test//built-in test ??
+--sb_load_lua//!!!!!!!!!!!!!!!!!!!!!
+--parse_test_arguments
+
+--if (sb_lua_loaded() && sb_lua_custom_command_defined(sb_globals.cmdname))
+    sb_lua_call_custom_command
+--else if (!strcmp(sb_globals.cmdname, "help"))
+		test->builtin_cmds.help()
+--else if (!strcmp(sb_globals.cmdname, "prepare"))
+		test->builtin_cmds.prepare()
+--else if (!strcmp(sb_globals.cmdname, "cleanup"))
+		rc = test->builtin_cmds.cleanup()
+--else if (!strcmp(sb_globals.cmdname, "run"))
+		rc = run_test(test) ? EXIT_FAILURE : EXIT_SUCCESS;
 
 
+--sb_lua_done()
+--db_done
+--sb_counters_done
+--sb_rand_done
+--sb_thread_done
 
 
 
