@@ -75,3 +75,47 @@ sb_lua_new_state
 sb_lua_new_state
 --luaL_openlibs
 
+7.run_test
+
+main
+--run_test
+----print_run_mode
+----sb_thread_create(&report_thread...)
+----sb_thread_create(&eventgen_thread...)
+----sb_thread_create(&checkpoints_thread...)
+----sb_thread_create_workers
+----sb_barrier_wait(&worker_barrier)
+----checkpoint(&stat);
+----sb_barrier_wait(&report_barrier)
+----sb_thread_join_workers
+------worker_thread
+--------sb_rand_thread_init
+--------sb_lua_op_thread_run/thread_run
+--------thread_run(备选)
+----------sb_more_events
+----------sb_event_start
+----------sb_event_start
+----------sb_event_stop
+--------sb_lua_op_thread_run（主流程）
+----------thread_run(sysbench.lua)
+------------ffi.C.sb_more_events
+------------ffi.C.sb_event_start
+------------pcall(event, thread_id)
+--------------event(insert.lua/update.lua/delete.lua/read.lua function event())
+------------ffi.C.sb_event_stop(thread_id)
+
+
+
+----sb_thread_cancel(report_thread) || sb_thread_join(report_thread, NULL)
+----sb_thread_cancel(eventgen_thread) || sb_thread_join(eventgen_thread, NULL)
+----sb_thread_cancel(checkpoints_thread) || sb_thread_join(checkpoints_thread, NULL)
+----
+
+
+8.oltp_insert.lua
+event
+--get_c_value
+--get_pad_value
+--string.format("INSERT INTO %s (id, k, c, pad) VALUES " .."(%d, %d, '%s', '%s')",table_name, i, k_val, c_val, pad_val))
+--check_reconnect
+
