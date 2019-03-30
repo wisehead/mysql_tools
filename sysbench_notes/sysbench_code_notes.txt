@@ -114,8 +114,23 @@ main
 
 8.oltp_insert.lua
 event
+--sysbench.rand.uniform
+----ffi.C.sb_rand_uniform(a, b)
+--sysbench.rand.default
+----ffi.C.sb_rand_default(a, b)
 --get_c_value
+----sysbench.rand.string(c_value_template)
+------ffi.new("uint8_t[?]", buflen)
+------ffi.C.sb_rand_str
+------ffi.string(buf, buflen)
 --get_pad_value
---string.format("INSERT INTO %s (id, k, c, pad) VALUES " .."(%d, %d, '%s', '%s')",table_name, i, k_val, c_val, pad_val))
+----sysbench.rand.string(pad_value_template)
+--con:query(string.format("INSERT INTO %s (id, k, c, pad) VALUES " .."(%d, %d, '%s', '%s')",table_name, i, k_val, c_val, pad_val)))
+----drv = sysbench.sql.driver()//in function thread_init()
+------sysbench.sql.driver
+----con = drv:connect()
+------driver_methods.connect
+----query()
+------connection_methods.query
 --check_reconnect
 
