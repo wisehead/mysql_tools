@@ -58,9 +58,20 @@ main
 --sb_thread_done
 
 
+4.luaL_loadfile
+
+sb_load_lua/sb_lua_op_thread_init/cmd_worker_thread/sb_lua_report_thread_init
+--sb_lua_new_state
+----luaL_loadfile
+
+5.luaL_newstate
+
+sb_lua_new_state
+--luaL_newstate
 
 
+6.luaL_openlibs
 
-
-
+sb_lua_new_state
+--luaL_openlibs
 
