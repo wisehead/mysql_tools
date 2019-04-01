@@ -134,3 +134,10 @@ event
 ------connection_methods.query
 --check_reconnect
 
+9.prepare
+main
+--sb_load_lua
+----sbtest.builtin_cmds.prepare = &sb_lua_cmd_prepare
+--test->builtin_cmds.prepare
+----sb_lua_cmd_prepare
+------execute_command
