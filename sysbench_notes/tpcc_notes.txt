@@ -1,0 +1,30 @@
+10.TPCC
+ MAXITEMS=100000
+ DIST_PER_WARE=10
+ CUST_PER_DIST=3000
+ 
+ 
+11.tpcc.lua
+//主测试流程，随机调用各个函数，完成不同的业务场景。
+function event()
+  -- print( NURand (1023,1,3000))
+  local max_trx =  sysbench.opt.enable_purge == "yes" and 24 or 23
+  local trx_type = sysbench.rand.uniform(1,max_trx)
+  if trx_type <= 10 then
+    trx="new_order"
+  elseif trx_type <= 20 then
+    trx="payment"
+  elseif trx_type <= 21 then
+    trx="orderstatus"
+  elseif trx_type <= 22 then
+    trx="delivery"
+  elseif trx_type <= 23 then
+    trx="stocklevel"
+  elseif trx_type <= 24 then
+    trx="purge"
+  end
+
+-- Execute transaction
+   _G[trx]()
+
+end
