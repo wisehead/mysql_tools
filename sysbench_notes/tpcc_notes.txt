@@ -118,9 +118,283 @@ check_tables
                                          WHERE c1+c_ytd_payment <> sm ]] ,table_num, table_num, table_num, warehouse_num))
 
 
+4.tpcc_run.lua
+
+4.1 function new_order()
+--con:query("BEGIN")
+--c_discount, c_last, c_credit, w_tax = con:query_row(([[SELECT c_discount, c_last, c_credit, w_tax
+                                                           FROM customer%d, warehouse%d
+                                                          WHERE w_id = %d
+                                                            AND c_w_id = w_id
+                                                            AND c_d_id = %d
+                                                            AND c_id = %d]]):
+                                                         format(table_num, table_num, w_id, d_id, c_id))
+--d_next_o_id, d_tax = con:query_row(([[SELECT d_next_o_id, d_tax
+                                          FROM district%d
+                                         WHERE d_w_id = %d
+                                           AND d_id = %d FOR UPDATE]]):
+                                        format(table_num, w_id, d_id))
+--con:query(([[UPDATE district%d
+                  SET d_next_o_id = %d
+                WHERE d_id = %d AND d_w_id= %d]]):format(table_num, d_next_o_id + 1, d_id, w_id))
+--con:query(([[INSERT INTO orders%d
+                           (o_id, o_d_id, o_w_id, o_c_id,  o_entry_d, o_ol_cnt, o_all_local)
+                    VALUES (%d,%d,%d,%d,NOW(),%d,%d)]]):
+                    format(table_num, d_next_o_id, d_id, w_id, c_id, ol_cnt, all_local))
+--con:query(([[INSERT INTO new_orders%d (no_o_id, no_d_id, no_w_id)
+                    VALUES (%d,%d,%d)]]):
+                   format(table_num, d_next_o_id, d_id, w_id))
+--//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--//for start
+--for ol_number=1, ol_cnt do
+--con:query(([[SELECT i_price, i_name, i_data
+                        FROM item%d
+                       WHERE i_id = %d]]):
+                      format(table_num, ol_i_id))        
+--s_quantity, s_data, ol_dist_info = con:query_row(([[SELECT s_quantity, s_data, s_dist_%s s_dist
+                                                          FROM stock%d
+                                                         WHERE s_i_id = %d AND s_w_id= %d FOR UPDATE]]):
+                                                         format(string.format("%02d",d_id),table_num,ol_i_id,ol_supply_w_id ))           
+--con:query(([[UPDATE stock%d
+                    SET s_quantity = %d
+                  WHERE s_i_id = %d
+                AND s_w_id= %d]]):
+            format(table_num, s_quantity, ol_i_id, ol_supply_w_id))
+--con:query(([[INSERT INTO order_line%d
+                                 (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_dist_info)
+                      VALUES (%d,%d,%d,%d,%d,%d,%d,%d,'%s')]]):
+                      format(table_num, d_next_o_id, d_id, w_id, ol_number, ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_dist_info))
+--//for end
+--！！！！！！！！！！！！！！！！！！！
 
 
 
+4.2 function payment()
+
+function payment()
+--con:query("BEGIN")
+--con:query(([[UPDATE warehouse%d
+              SET w_ytd = w_ytd + %d
+            WHERE w_id = %d]]):format(table_num, h_amount, w_id ))
+--w_street_1, w_street_2, w_city, w_state, w_zip, w_name =
+                          con:query_row(([[SELECT w_street_1, w_street_2, w_city, w_state, w_zip, w_name
+                                             FROM warehouse%d
+                                            WHERE w_id = %d]]):format(table_num, w_id))
+--con:query(([[UPDATE district%d
+                 SET d_ytd = d_ytd + %d
+               WHERE d_w_id = %d
+                 AND d_id= %d]]):format(table_num, h_amount, w_id, d_id))
+--d_street_1,d_street_2, d_city, d_state, d_zip, d_name =
+                          con:query_row(([[SELECT d_street_1, d_street_2, d_city, d_state, d_zip, d_name
+                                             FROM district%d
+                                            WHERE d_w_id = %d
+                                              AND d_id = %d]]):format(table_num, w_id, d_id ))
+--c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip,
+  c_phone, c_credit, c_credit_lim, c_discount, c_balance, c_ytd_payment, c_since =
+     con:query_row(([[SELECT c_first, c_middle, c_last, c_street_1,
+                                 c_street_2, c_city, c_state, c_zip, c_phone,
+                                 c_credit, c_credit_lim, c_discount, c_balance, c_ytd_payment, c_since
+                FROM customer%d
+               WHERE c_w_id = %d
+                 AND c_d_id= %d
+                 AND c_id=%d FOR UPDATE]])
+             :format(table_num, w_id, c_d_id, c_id ))
+--con:query(([[UPDATE customer%d
+                        SET c_balance=%f, c_ytd_payment=%f
+                      WHERE c_w_id = %d
+                        AND c_d_id=%d
+                        AND c_id=%d]])
+          :format(table_num, c_balance, c_ytd_payment, w_id, c_d_id, c_id  ))
+--con:query(([[INSERT INTO history%d
+                           (h_c_d_id, h_c_w_id, h_c_id, h_d_id,  h_w_id, h_date, h_amount, h_data)
+                    VALUES (%d,%d,%d,%d,%d,NOW(),%d,'%s')]])
+            :format(table_num, c_d_id, c_w_id, c_id, d_id,  w_id, h_amount, string.format("%10s %10s    ",w_name,d_name)))
+--con:query("COMMIT")
+
+4.3 function orderstatus()
+function orderstatus()
+--c_balance, c_first, c_middle, c_last =
+                   con:query_row(([[SELECT c_balance, c_first, c_middle, c_last
+                                      FROM customer%d
+                                 WHERE c_w_id = %d
+                                   AND c_d_id=%d
+                                       AND c_id=%d]])
+                                  :format(table_num, w_id, d_id, c_id ))
+--o_id = con:query_row(([[SELECT o_id, o_carrier_id, o_entry_d
+                                FROM orders%d
+                               WHERE o_w_id = %d
+                                 AND o_d_id = %d
+                                 AND o_c_id = %d
+                                  ORDER BY o_id DESC]]):
+                             format(table_num, w_id, d_id, c_id))
+--con:query(([[SELECT ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_delivery_d
+            FROM order_line%d WHERE ol_w_id = %d AND ol_d_id = %d  AND ol_o_id = %d]])
+                  :format(table_num, w_id, d_id, d_id, o_id))
+--con:query("COMMIT")
+
+
+4.4 function delivery()
+function delivery()
+--con:query("BEGIN")
+--for  d_id = 1, DIST_PER_WARE do//!!!!!!!!!!!!!!
+--con:query(([[SELECT no_o_id
+                                     FROM new_orders%d
+                                    WHERE no_d_id = %d
+                                      AND no_w_id = %d
+                                      ORDER BY no_o_id ASC LIMIT 1 FOR UPDATE]])
+                                   :format(table_num, d_id, w_id))
+--con:query(([[DELETE FROM new_orders%d
+                           WHERE no_o_id = %d
+                             AND no_d_id = %d
+                             AND no_w_id = %d]])
+                            :format(table_num, no_o_id, d_id, w_id))
+--o_c_id = con:query_row(([[SELECT o_c_id
+                                    FROM orders%d
+                                   WHERE o_id = %d
+                                     AND o_d_id = %d
+                                     AND o_w_id = %d]])
+                                  :format(table_num, no_o_id, d_id, w_id))
+--con:query(([[UPDATE orders%d
+                        SET o_carrier_id = %d
+                      WHERE o_id = %d
+                        AND o_d_id = %d
+                        AND o_w_id = %d]])
+                      :format(table_num, o_carrier_id, no_o_id, d_id, w_id))
+--con:query(([[UPDATE order_line%d
+                        SET ol_delivery_d = NOW()
+                      WHERE ol_o_id = %d
+                        AND ol_d_id = %d
+                        AND ol_w_id = %d]])
+                      :format(table_num, no_o_id, d_id, w_id))
+--sm_ol_amount = con:query_row(([[SELECT SUM(ol_amount) sm
+                                          FROM order_line%d
+                                         WHERE ol_o_id = %d
+                                           AND ol_d_id = %d
+                                           AND ol_w_id = %d]])
+                                      :format(table_num, no_o_id, d_id, w_id))
+--con:query(([[UPDATE customer%d
+                        SET c_balance = c_balance + %f,
+                            c_delivery_cnt = c_delivery_cnt + 1
+                      WHERE c_id = %d
+                        AND c_d_id = %d
+                        AND c_w_id = %d]])
+                      :format(table_num, sm_ol_amount, o_c_id, d_id, w_id))
+--end for //!!!!!!!!!!!!!!
+--con:query("COMMIT")
+
+4.5 function stocklevel()
+function stocklevel()
+--con:query("BEGIN")
+--d_next_o_id = con:query_row(([[SELECT d_next_o_id
+                                     FROM district%d
+                                    WHERE d_id = %d AND d_w_id= %d]])
+                          :format( table_num, d_id, w_id))
+--con:query(([[SELECT COUNT(DISTINCT (s_i_id))
+                        FROM order_line%d, stock%d
+                       WHERE ol_w_id = %d
+                         AND ol_d_id = %d
+                         AND ol_o_id < %d
+                         AND ol_o_id >= %d
+                         AND s_w_id= %d
+                         AND s_i_id=ol_i_id
+                         AND s_quantity < %d ]])
+        :format(table_num, table_num, w_id, d_id, d_next_o_id, d_next_o_id - 20, w_id, level ))
+--con:query(([[SELECT count(*) FROM stock%d
+                   WHERE s_w_id = %d AND s_i_id = %d
+                   AND s_quantity < %d]])
+                :format(table_num, w_id, ol_i_id[i], level ) )
+--con:query("COMMIT")
+
+
+4.6 function purge()
+function purge()
+--con:query("BEGIN")
+--con:query(([[SELECT min(no_o_id) mo
+                                     FROM new_orders%d
+                                    WHERE no_w_id = %d AND no_d_id = %d]])
+                                   :format(table_num, w_id, d_id))
+--con:query(([[SELECT o_id FROM orders%d o, (SELECT o_c_id,o_w_id,o_d_id,count(distinct o_id) FROM orders%d WHERE o_w_id=%d AND o_d_id=%d AND o_id > 2100 AND o_id < %d GROUP BY o_c_id,o_d_id,o_w_id having count( distinct o_id) > 1 limit 1) t WHERE t.o_w_id=o.o_w_id and t.o_d_id=o.o_d_id and t.o_c_id=o.o_c_id limit 1 ]])
+                                   :format(table_num, table_num, w_id, d_id, m_o_id))
+--con:query(([[DELETE FROM order_line%d where ol_w_id=%d AND ol_d_id=%d AND ol_o_id=%d]])
+                            :format(table_num, w_id, d_id, del_o_id))
+--con:query(([[DELETE FROM orders%d where o_w_id=%d AND o_d_id=%d and o_id=%d]])
+                            :format(table_num, w_id, d_id, del_o_id))
+--con:query(([[DELETE FROM history%d where h_w_id=%d AND h_d_id=%d LIMIT 10]])
+                            :format(table_num, w_id, d_id ))
+--con:query("COMMIT")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+              
 
 
 
