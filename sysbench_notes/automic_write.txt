@@ -1,0 +1,62 @@
+1.sfx
+
+srv_conc_enter_innodb
+btr_cur_search_to_nth_level
+
+buf_page_get_gen(called by btr_cur_search_to_nth_level)
+
+
+buf_flush_page_cleaner_thread的个数？？？
+进入内核线程数？？？
+统计个数
+
+
+2.intel
+srv_conc_enter_innodb
+fsp_reserve_free_extents（fsp_reserve_free_extents） 3+1+1+1+1+1
+
+fil_flush 1
+
+fil_flush---buf_dblwr_write_single_page 2+1+1+1+1+1
+
+btr_cur_search_to_nth_level
+
+
+
+buf_flush_page_cleaner_thread 
+--buf_dblwr_flush_buffered_writes
+
+srv_purge_coordinator_thread
+--buf_dblwr_write_single_page
+
+3.sfx 25,已经稳定
+
+btr_cur_search_to_nth_level 1+1+1+1+1+1+1+1+1+1+1+1+1+1
+
+buf_page_get_gen（btr_cur_search_to_nth_level） 1+1
+
+buf_flush_page_cleaner_thread
+--buf_flush_page
+
+srv_purge_coordinator_thread
+--btr_cur_search_to_nth_level
+
+
+4.intel 25,已经稳定
+mtr_commit 2+1+1+1+1+1+1+1+1+1+1+1+1+1
+
+open_table
+
+fil_io --- buf_get_page
+
+fil_io --- log_group_write_buf
+
+buf_flush_page_cleaner_thread
+--buf_do_LRU_batch
+----log_write_up_to
+
+srv_purge_coordinator_thread
+--mtr_commit
+
+
+

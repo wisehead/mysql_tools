@@ -1,10 +1,47 @@
-10.TPCC
+1.tpcc_common.lua
  MAXITEMS=100000
  DIST_PER_WARE=10
  CUST_PER_DIST=3000
+
+cmd_prepare
+--create_tables
+----create warehouse%d
+----create district%d
+----create customer%d
+----create history%d
+----create orders%d
+----create new_orders%d
+----create stock%d
+----create item%d
+------bulk_insert_init("INSERT INTO item"
+----create indexes
+----create foreign key constraint
+--load_tables
+----bulk_insert_init("INSERT INTO warehouse"
+----bulk_insert_init("INSERT INTO district"
+----bulk_insert_init("INSERT INTO customer"
+----bulk_insert_init("INSERT INTO history"
+----bulk_insert_init("INSERT INTO orders"
+----bulk_insert_init("INSERT INTO stock"
+----query(string.format("INSERT INTO new_orders%d
+----bulk_insert_init("INSERT INTO order_line"
+
+
+cmd_check
+--check_tables
+
+cleanup
+--con:query("DROP TABLE IF EXISTS history" .. i )
+--con:query("DROP TABLE IF EXISTS new_orders" .. i )
+--con:query("DROP TABLE IF EXISTS order_line" .. i )
+--con:query("DROP TABLE IF EXISTS orders" .. i )
+--con:query("DROP TABLE IF EXISTS customer" .. i )
+--con:query("DROP TABLE IF EXISTS district" .. i )
+--con:query("DROP TABLE IF EXISTS stock" .. i )
+--con:query("DROP TABLE IF EXISTS item" .. i )
+--con:query("DROP TABLE IF EXISTS warehouse" .. i )
  
- 
-11.tpcc.lua
+2.tpcc.lua
 //主测试流程，随机调用各个函数，完成不同的业务场景。
 function event()
   -- print( NURand (1023,1,3000))
@@ -28,3 +65,9 @@ function event()
    _G[trx]()
 
 end
+
+
+
+
+
+
