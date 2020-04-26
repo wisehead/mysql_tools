@@ -94,6 +94,49 @@ xtrabackup_backup_func
 ----xtrabackup_scan_log_recs
 --/* Populate fil_system with tablespaces to copy */
 --xb_load_tablespaces
+----os_thread_create(io_handler_thread
+------fil_aio_wait
+----SysTablespace::check_file_spec
+----Tablespace::open_or_create//Open or Create the data files if they do not exist.
+------Datafile::open_or_create
+--------os_file_create
+------fil_space_create//Create a space memory object and put it to the fil_system hash table.
+------fil_node_create//Appends a new file to the chain of files of a space. File must be closed.
+--------fil_node_create_low
+----srv_undo_tablespaces_init/* Add separate undo tablespaces to fil_system */
+----xb_load_single_table_tablespaces
+--mdl_lock_init
+----xb_mysql_connect
+----xb_mysql_query(mdl_con, "BEGIN", false, true);
+//=======================TokuDB Part=========================
+--
+```
+
+#3.tokudb hot-backup Process
+
+```
+    /*
+                        TokuDB Hot-Backup
+                        =================
+    We'll describe how Xtrabackup support TokuDB Hot-Backup?
+    Method Xtrabackup backups up InnoDB engine has specificity. Backups up tokudb works as follow:
+
+        STEP 1. SET TOKUDB_CHECKPOINT_LOCK=ON;
+            prevents dirty pages in cachetable flushing to disk
+            so log files will rise until STEP 3
+
+        STEP 2. Copy tokudb data files(*.tokudb)
+            after set TOKUDB_CHECKPOINT_LOCK on, data files won't change any more, but write operation continues(log files still increase)
+
+        STEP 3. FLUSH TABLES WITH READ LOCK;
+            prevents write operation, so log files won't change any more
+
+        STEP 4. Copy tokudb log files(*.tokulog)
+
+        STEP 5. UNLOCK TABLES
+
+        STEP 6. SET TOKUDB_CHECKPOINT_LOCK=OFF
+    */
 ```
 
 
