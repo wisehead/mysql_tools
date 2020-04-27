@@ -145,7 +145,7 @@ xtrabackup_backup_func
 #4.tokudb part for backup
 
 ```cpp
-//=======================TokuDB Part=========================
+//=======================TokuDB Backup Start=========================
 xtrabackup_backup_func
 --has_tokudb_plugin
 ----query = "SELECT COUNT(*) FROM information_schema.plugins WHERE plugin_name='TokuDB'"
@@ -200,6 +200,25 @@ xtrabackup_backup_func
 ------copy_file
 ------my_thread_end();
 ------os_thread_exit();
+    /*
+    === TokuDB Hot-Backup ===
+    STEP 5：
+    UNLOCK TABLES
+    */
+--backup_finish
+----unlock_all(mysql_connection);
+----xb_mysql_query(mysql_connection,"START SLAVE SQL_THREAD", false);
+----write_backup_config_file
+----write_xtrabackup_info
+    /*
+    === TokuDB Hot-Backup ===
+    STEP 6：
+    SET TOKUDB_CHECKPOINT_LOCK = OFF
+    */
+--unlock_tokudb_tables
+----xb_mysql_query(connection,"SET TOKUDB_CHECKPOINT_LOCK = OFF", false);
+//===================Tokudb backup END===================
+--mdl_unlock_all
 
 ```
 
