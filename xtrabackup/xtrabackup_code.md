@@ -105,6 +105,7 @@ xtrabackup_backup_func
 --------fil_node_create_low
 ----srv_undo_tablespaces_init/* Add separate undo tablespaces to fil_system */
 ----xb_load_single_table_tablespaces
+------xb_load_single_table_tablespace（少个s）
 --mdl_lock_init
 ----xb_mysql_connect
 ----xb_mysql_query(mdl_con, "BEGIN", false, true);
@@ -173,6 +174,8 @@ xtrabackup_backup_func
 ------my_thread_init
 ------datadir_node_init
 ------copy_file//?????
+--------datafile_read
+--------ds_write
 ------my_thread_end
 ------os_thread_exit
     /*
@@ -184,9 +187,12 @@ xtrabackup_backup_func
     we also backup RocksDB in backu_start()
     and We will execute "FLUSH TABLE WITH READ LOCK" here to prevent DDL */
 --backup_start
-----backup_files
-------datadir_node_init
-------datafile_rsync_backup
+----backup_files//直接返回
+----lock_tables_maybe
+------xb_mysql_query(connection, "FLUSH TABLES WITH READ LOCK", false);
+----backup_files//拷贝所有的非数据文件（ibd和tokudb数据文件之外的其它文件）
+----write_binlog_info
+----xb_mysql_query(mysql_connection, "FLUSH NO_WRITE_TO_BINLOG ENGINE LOGS", false);
     /*
     === TokuDB Hot-Backup ===
     STEP 4：
@@ -197,7 +203,7 @@ xtrabackup_backup_func
 ------my_thread_init
 ------datadir_node_init
 ------filename_matches_regex
-------copy_file
+------copy_file//copy tokudb log and meta files
 ------my_thread_end();
 ------os_thread_exit();
     /*
