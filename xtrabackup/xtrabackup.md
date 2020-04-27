@@ -109,6 +109,9 @@ xtrabackup_backup_func
 ----xb_mysql_connect
 ----xb_mysql_query(mdl_con, "BEGIN", false, true);
 //=======================TokuDB Part=========================
+--lock_tokudb_tables
+----xb_mysql_query(connection,"SET TOKUDB_CHECKPOINT_LOCK = ON", false);
+--os_thread_create(data_copy_thread_func//for innodb
 --
 ```
 
@@ -139,6 +142,66 @@ xtrabackup_backup_func
     */
 ```
 
+#4.tokudb part for backup
+
+```cpp
+//=======================TokuDB Part=========================
+xtrabackup_backup_func
+--has_tokudb_plugin
+----query = "SELECT COUNT(*) FROM information_schema.plugins WHERE plugin_name='TokuDB'"
+----xb_mysql_query//?
+----mysql_fetch_row
+...
+//other innodb related code.
+...
+    /*
+    === TokuDB Hot-Backup ===
+    STEP 1：
+    SET TOKUDB_CHECKPOINT_LOCK=ON, Lock TokuDB tables
+    */
+--lock_tokudb_tables
+----xb_mysql_query(connection,"SET TOKUDB_CHECKPOINT_LOCK = ON", false);
+    
+	/*
+	=== TokuDB Hot-Backup ===
+	STEP 2：
+	Copy tokudb data files(*.tokudb)
+	*/
+    
+--os_thread_create(data_copy_thread_func//for innodb
+----data_copy_thread_func
+------my_thread_init
+------datadir_node_init
+------copy_file//?????
+------my_thread_end
+------os_thread_exit
+    /*
+    === TokuDB Hot-Backup ===
+    STEP 3：
+    FLUSH TABLES WITH READ LOCK;
+
+    Backup non-InnoDB files, e.g frm, MYD, MYI ...
+    we also backup RocksDB in backu_start()
+    and We will execute "FLUSH TABLE WITH READ LOCK" here to prevent DDL */
+--backup_start
+----backup_files
+------datadir_node_init
+------datafile_rsync_backup
+    /*
+    === TokuDB Hot-Backup ===
+    STEP 4：
+    Copy tokudb log files(*.tokulog)
+    */
+--os_thread_create(tokudb_log_copying_thread）
+----tokudb_log_copying_thread
+------my_thread_init
+------datadir_node_init
+------filename_matches_regex
+------copy_file
+------my_thread_end();
+------os_thread_exit();
+
+```
 
 
 
