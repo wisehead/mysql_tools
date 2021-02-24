@@ -1,0 +1,64 @@
+pathtest = string.match(test, "(.*/)") or ""
+
+dofile(pathtest .. "common.lua")
+
+function uuid()        
+    local seed = {'0','1','2','3','4','5','6','7','8','9',"a","b","c","d","e","f"}
+    local tb={}  
+    for i=1,32 do
+        table.insert(tb, seed[math.random(1,16)])
+    end
+    local sid = table.concat(tb)
+    return string.format('%s%s%s%s%s',
+        string.sub(sid, 1, 8), 
+        string.sub(sid, 9, 12),
+        string.sub(sid, 13, 16),
+        string.sub(sid, 17, 20),
+        string.sub(sid, 21, 32) 
+    )
+end
+function thread_init(thread_id)
+   set_vars()
+local xid=math.random(1000)
+   print(xid)
+
+   if (db_driver == "mysql" and mysql_table_engine == "myisam") then
+      begin_query = "LOCK TABLES sbtest WRITE"
+      commit_query = "UNLOCK TABLES"
+   else
+      begin_query = "BEGIN"
+      commit_query = "COMMIT"
+   end
+
+end
+
+function event(thread_id)
+   local rs
+   local i
+   local table_name
+   local range_start
+   local c_val
+   local pad_val
+   local query
+   local sid
+   local seed = {'0','1','2','3','4','5','6','7','8','9',"a","b","c","d","e","f"}
+   local tb={}  
+
+   table_name = "sbtest".. sb_rand_uniform(1, oltp_tables_count)
+   if not oltp_skip_trx then
+      db_query(begin_query)
+   end
+   for i=1, oltp_point_selects do
+      --[[
+        [db_query("xa start ".."'"..xid.."'")
+         [rs = db_query("SELECT c FROM ".. table_name .." WHERE id=" .. sb_rand(1, oltp_table_size))
+         [db_query("xa end ".."'"..xid.."'")
+         [db_query("xa prepare ".."'"..xid.."'")
+         [db_query("xa commit ".."'"..xid.."'")
+         ]]
+   end
+   if not oltp_skip_trx then                                                                                                                                                                   
+       db_query(commit_query)
+   end
+end
+

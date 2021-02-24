@@ -1,0 +1,102 @@
+sysbench 0.5:  multi-threaded system evaluation benchmark
+
+Running the test with following options:
+Number of threads: 32
+Report intermediate results every 5 second(s)
+Random number generator seed is 0 and will be ignored
+
+
+Threads started!
+
+[   5s] threads: 32, tps: 0.00, reads/s: 0.00, writes/s: 12081.66, response time: 3.91ms (95%)
+[  10s] threads: 32, tps: 0.00, reads/s: 0.00, writes/s: 12336.61, response time: 3.89ms (95%)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (391752068, 175171447, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '391752068' for key 'PRIMARY'
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (876538245, 315994464, 'a', 'a')`:
+FATAL: failed to execute function `event': (null)
+ALERT: Error 1062 Duplicate entry '876538245' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (1223100803, 204340005, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '1223100803' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (738314626, 214984292, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '738314626' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (253528449, 147605031, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '253528449' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (1084877184, 205121831, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '1084877184' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (600091007, 9270607, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '600091007' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (115304830, 25132855, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '115304830' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (946653565, 213113205, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '946653565' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (461867388, 110010077, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '461867388' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (1293216123, 76208812, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '1293216123' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (808429946, 131606265, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '808429946' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (323643769, 301135197, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '323643769' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (1154992504, 232456763, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '1154992504' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (670206327, 42178979, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '670206327' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (185420150, 53514753, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '185420150' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (1016768885, 184003403, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '1016768885' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (531982708, 157099640, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '531982708' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (47196531, 103915695, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '47196531' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (878545266, 88390903, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '878545266' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (393759089, 145963849, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '393759089' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (1225107824, 248855613, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '1225107824' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (740321647, 138858806, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '740321647' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (255535470, 228277850, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '255535470' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (1086884205, 94412193, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '1086884205' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (602098028, 51896486, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '602098028' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (117311851, 201915505, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '117311851' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (948660586, 137757753, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '948660586' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (463874409, 145806899, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '463874409' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (1295223144, 322335109, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '1295223144' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)

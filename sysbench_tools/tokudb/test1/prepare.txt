@@ -1,0 +1,4 @@
+sysbench 0.5:  multi-threaded system evaluation benchmark
+
+Creating table 'sbtest1'...
+Inserting 100000 records into 'sbtest1'

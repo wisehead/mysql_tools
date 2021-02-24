@@ -1,0 +1,57 @@
++-------------------+--------------------------------------------+------------------+----------+----------+--------+--------------+------------+-----------------------+
+| dictionary_name   | internal_file_name                         | checkpoint_count | blocknum | offset   | size   | table_schema | table_name | table_dictionary_name |
++-------------------+--------------------------------------------+------------------+----------+----------+--------+--------------+------------+-----------------------+
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |        0 |     NULL |      0 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |        1 |     NULL |      0 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |        2 |   315392 |     26 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |        3 | 11681792 |   1024 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |        4 | 11268096 | 411648 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |        5 | 11071488 | 193024 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |        6 | 10248192 | 823296 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |        7 |  9420800 | 823808 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |        8 |  8597504 | 823296 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |        9 |  7774208 | 822784 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       10 |  6946816 | 823808 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       11 |  6123520 | 823296 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       12 |  5300224 | 823296 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       13 |  4472832 | 824320 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       14 |  3645440 | 825856 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       15 |  2813952 | 827904 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       16 |  1986560 | 826880 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       17 |  1155072 | 828416 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       18 |   323584 | 827904 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       19 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       20 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       21 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       22 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       23 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       24 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       25 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       26 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       27 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       28 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       29 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       30 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                2 |       31 |     NULL |   NULL | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |        0 |     NULL |      0 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |        1 | 11685888 |    324 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |        2 |   315392 |     26 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |        3 | 11681792 |   1024 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |        4 | 11268096 | 411648 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |        5 | 11071488 | 193024 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |        6 | 10248192 | 823296 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |        7 |  9420800 | 823808 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |        8 |  8597504 | 823296 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |        9 |  7774208 | 822784 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |       10 |  6946816 | 823808 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |       11 |  6123520 | 823296 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |       12 |  5300224 | 823296 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |       13 |  4472832 | 824320 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |       14 |  3645440 | 825856 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |       15 |  2813952 | 827904 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |       16 |  1986560 | 826880 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |       17 |  1155072 | 828416 | hi           | sbtest1    | main                  |
+| ./hi/sbtest1-main | ./_hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb |                1 |       18 |   323584 | 827904 | hi           | sbtest1    | main                  |
++-------------------+--------------------------------------------+------------------+----------+----------+--------+--------------+------------+-----------------------+
+51 rows in set (0.00 sec)
+20709376 May 12 17:28 _hi_sbtest1_main_343fbf1_1_1d_B_0.tokudb

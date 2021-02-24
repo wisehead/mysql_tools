@@ -1,0 +1,227 @@
+# create database
+create database if not exists testdb;
+
+# create table
+--source include/have_innodb.inc
+use testdb;
+SET storage_engine=innodb;
+create table tbl(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7));
+
+# insert
+insert tbl values();
+insert tbl values(NULL, 2, 3, 4.4, 5.5, '6', '7', '8', '9');
+insert into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert low_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert high_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+alter table tbl engine=myisam;
+insert delayed into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9');
+alter table tbl engine=innodb;
+insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9');
+insert tbl values(NULL, 1*2, 3+10, 4.4, 5.5, '6', '7', '8', '9');
+insert tbl values(NULL, default, default, default, default, default, default, '8', '9');
+insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9'), (NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9') on duplicate key update col3=values(col3)+values(col3);
+insert low_priority ignore tbl set col2=default, col8='8', col9='9';
+insert high_priority tbl set col2=default, col8='8', col9='9' on duplicate key update col3=values(col3)+100;
+create table tbl2(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7));
+insert tbl2 values(2, 12, 13, 14.4, 15.5, '16', '17', '18', '19');
+insert tbl2 values(10, 22, 23, 24.4, 25.5, '26', '27', '28', '29');
+insert high_priority ignore tbl select * from tbl2;
+insert low_priority ignore tbl(col2, col4, col6, col8, col9) select col2, col4, col6, col8, col9 from tbl2;
+select * from tbl;
+
+# update
+update tbl set col5=5.54321, col6='654321' where col1=10;
+update low_priority tbl set col2=100 order by col1 limit 5;
+update low_priority tbl set col2=col2+100 where col1 < 10;
+update low_priority ignore tbl,tbl2 set tbl.col8=tbl2.col8, tbl.col9=tbl2.col9 where tbl.col1=tbl2.col1;
+select * from tbl;
+
+# select
+select 1+1 from tbl;
+select floor(col1+col2+col3+col4+col5) as colTemp from tbl;
+select * from tbl;
+select col2, count(*) from tbl where col7 is not null and col7 != '' group by col2 having col2 >= 10;
+select t1.col1, t1.col6, t1.col7, t2.col1, t2.col8, t2.col9 from tbl as t1, tbl2 as t2 where t1.col1 = t2.col1 and t2.col6 >='20';
+select * from tbl;
+select col6, max(col2) from tbl group by col6 having max(col4) >= 4;
+select * from tbl limit 5,10;
+select * into outfile './outData1' fields terminated by ',' optionally enclosed by '"' lines terminated by '\n' from tbl;
+select * into dumpfile './outData2' from tbl where col1 > 10 and col2 > 10 and col6 > '10' and col8 > '10';
+select all high_priority t1.col1, t1.col6, t1.col7, t2.col1, t2.col8, t2.col9 from tbl as t1, tbl2 as t2 where t1.col1 = t2.col1 and t2.col8 >='20' and t1.col9 >='20';
+select distinct sql_big_result sql_buffer_result col4,col5,col6 from tbl;
+select sql_small_result col8, count(*) from tbl group by col8;
+select sql_calc_found_rows * from tbl;
+select sql_cache * from tbl union select sql_cache * from tbl2;
+select tbl.* from tbl,tbl2 where tbl.col6=tbl2.col6 for update;
+select * from tbl lock in share mode;
+
+# subquery
+select (select col8 from tbl where col9 > '20' order by col5 desc limit 1 ) as col8;
+select col4,col9 from tbl where col4 >= 4.4 and col6 between 1.1 and 7.7 order by col8 desc limit 1;
+select (select upper(col9) from tbl where col4>=4.4 and col6 between 1.1 and 7.7 order by col8 desc limit 1) as col9;
+select * from tbl where col6 = (select min(col6) from tbl2);
+select * from tbl where col6 <= (select max(col6) from tbl2);
+select * from tbl where col8 > any(select col8 from tbl2);
+select * from tbl where col8 = any(select col8 from tbl2);
+select * from tbl where col8 in (select col8 from tbl2);
+select * from tbl where col8 not in (select col8 from tbl2);
+select * from tbl where col8 <> some(select col8 from tbl2);
+select * from tbl where col9 > all(select col9 from tbl2);
+select * from tbl where col9 <> all(select col9 from tbl2);
+select * from tbl where (col6,col7) = ('6','7');
+select * from tbl where row(3,'18','19') = (col3, col8, col9);
+select * from tbl where exists(select * from tbl2 where col8 >= '8');
+select * from tbl where not exists(select * from tbl2 where col8 >= '8');
+select * from tbl t1 where col3 = any(select col3 from tbl2 t2 where t1.col2 = t2.col2);
+select * from (select * from tbl where not exists(select * from tbl2 where col8 >= '8')) as t;
+select col6,col7,col8,col9 from (select * from tbl where not exists(select * from tbl2 where col8 >= '8')) as t where col8 >= '8';
+
+# join
+select t1.*,t2.* from tbl t1 left outer join tbl2 t2 on t1.col2=t2.col2 where t2.col6 is not null and t2.col6 != '';
+select t1.*,t2.* from tbl t1 inner join tbl2 t2 on t1.col3=t2.col3;
+select t1.*,t2.* from tbl t1 right outer join tbl2 t2 on t1.col4=t2.col4;
+select t1.col8,t2.col9 from tbl t1 left outer join tbl2 t2 using(col3);
+select t1.col8,t2.col9 from tbl t1 straight_join tbl2 t2 on t1.col1=t2.col1;
+select t1.col8,t2.col9 from tbl t1 force index(col2) straight_join tbl2 t2 on t1.col5=t2.col5;
+select t1.col6,t2.col7 from tbl t1 ignore index(col3) straight_join tbl2 t2 on t1.col6=t2.col6;
+select t1.col4,t2.col5 from tbl t1 force index(col4,col5) straight_join tbl2 t2 on t1.col5=t2.col5;
+select t1.col2,t2.col3 from tbl t1 ignore index(col6) natural left join tbl2 t2;
+
+# truncate
+truncate table tbl;
+truncate tbl2;
+
+# replace
+replace tbl values();
+replace tbl values(NULL, 2, 3, 4.4, 5.5, '6', '7', '8', '9');
+delete from tbl;
+replace into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+delete low_priority quick ignore from tbl;
+replace low_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+delete low_priority quick ignore from tbl where col2>10 and col6='6';
+replace low_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+alter table tbl engine=myisam;
+replace delayed into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+replace delayed into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+replace delayed into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9');
+alter table tbl engine=innodb;
+replace tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9');
+delete from tbl order by col2 limit 10;
+replace tbl values(NULL, 1*2, 3+10, 4.4, 5.5, '6', '7', '8', '9');
+replace tbl values(NULL, default, default, default, default, default, default, '8', '9');
+replace tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9'), (NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9');
+replace low_priority tbl set col2=default, col8='8', col9='9';
+replace tbl2 values(2, 12, 13, 14.4, 15.5, '16', '17', '18', '19');
+replace tbl2 values(10, 22, 23, 24.4, 25.5, '26', '27', '28', '29');
+replace low_priority tbl select * from tbl2;
+replace low_priority tbl(col2, col4, col6, col8, col9) select col2, col4, col6, col8, col9 from tbl2;
+delete low_priority quick ignore from tbl using tbl,tbl2 where tbl.col2 = tbl2.col2;
+select * from tbl;
+
+# load data
+delete from tbl;
+load data infile './outData1' into table tbl fields terminated by ',' optionally enclosed by '"' lines terminated by '\n';
+select * from tbl;
+delete from tbl;
+load data low_priority infile './outData1' replace into table tbl fields terminated by ',' optionally enclosed by '"' lines terminated by '\n';
+select * from tbl;
+delete from tbl;
+load data concurrent infile './outData1' ignore into table tbl fields terminated by ',' optionally enclosed by '"' lines terminated by '\n';
+select * from tbl;
+load data low_priority infile './outData1' replace into table tbl fields terminated by ',' optionally enclosed by '"' lines terminated by '\n' ignore 1 lines;
+delete from tbl;
+load data low_priority infile './outData1' replace into table tbl fields terminated by ',' optionally enclosed by '"' lines terminated by '\n' set col8='test8';
+select * from tbl;
+load data concurrent infile './outData1' replace into table tbl fields terminated by ',' optionally enclosed by '"' lines terminated by '\n' (col1,col2,col3,col4,col5,col6,col7,col8,col9);
+load data concurrent infile './outData1' replace into table tbl fields terminated by ',' optionally enclosed by '"' lines terminated by '\n' (col1,col2,col3,col4,col5,@var6,@var7,col8,col9);
+
+# do
+do 2+3,3,4*5;
+
+# prepare
+prepare stmt1 from 'select sum(pow(?,2) + pow(?,2)) as a';
+set @a=3;
+set @b=4;
+execute stmt1 using @a,@b;
+
+set @s = 'select sum(pow(?,2) + pow(?,2)) as a';
+prepare stmt2 from @s;
+set @a=6;
+set @b=8;
+execute stmt2 using @a,@b;
+
+set @s = 'select * from tbl where col8=?';
+prepare stmt3 from @s;
+set @a='8';
+execute stmt3 using @a;
+
+# transaction
+start transaction;
+select @A:=col3 from tbl where col1 = 11;
+update tbl set col3=@A+100 where col1=12;
+commit;
+select * from tbl;
+
+begin work;
+delete from tbl order by col1 desc limit 1;
+rollback;
+select * from tbl;
+
+begin;
+delete from tbl order by col1 desc limit 1;
+commit work and no chain no release;
+select * from tbl;
+
+start transaction;
+select @A:=col3 from tbl where col1 = 11;
+savepoint p_update;
+update tbl set col3=@A+100 where col1=11;
+savepoint p_delete;
+delete from tbl order by col1 desc limit 1;
+rollback work to savepoint p_update;
+select * from tbl;
+ 
+start transaction;
+select @A:=col3 from tbl where col1 = 11;
+savepoint p_update;
+update tbl set col3=@A+200 where col1=11;
+savepoint p_delete;
+delete from tbl order by col1 desc limit 1;
+release savepoint p_delete;
+rollback to savepoint p_update;
+select * from tbl;
+
+lock tables tbl write, tbl2 write;
+insert into tbl select * from tbl2 where col1 = 1;
+unlock tables;
+
+lock tables tbl read;
+select * from tbl;
+unlock tables;
+
+lock tables tbl as t1 read;
+Select * from tbl as t1;
+unlock tables;
+
+lock tables tbl low_priority write, tbl2 read local;
+update tbl set col3=500 where col1=2;
+select * from tbl2;
+unlock tables;
+
+set global transaction isolation level read uncommitted;
+show variables like '%iso%';
+show global variables like '%iso%';
+set session transaction isolation level read committed;
+show variables like '%iso%';
+show global variables like '%iso%';
+set transaction isolation level serializable;
+show variables like '%iso%';
+show global variables like '%iso%';
+set global transaction isolation level repeatable read;
+show variables like '%iso%';
+show global variables like '%iso%';
+
+# drop database
+drop database testdb;

@@ -1,0 +1,13 @@
+sysbench 0.5:  multi-threaded system evaluation benchmark
+
+Running the test with following options:
+Number of threads: 32
+Report intermediate results every 5 second(s)
+Random number generator seed is 0 and will be ignored
+
+
+Threads started!
+
+ALERT: failed to execute MySQL query: `INSERT INTO sbtest1 (id, k, c, pad) VALUES (263627, 501075, 'a', 'a')`:
+ALERT: Error 1062 Duplicate entry '263627' for key 'PRIMARY'
+FATAL: failed to execute function `event': (null)

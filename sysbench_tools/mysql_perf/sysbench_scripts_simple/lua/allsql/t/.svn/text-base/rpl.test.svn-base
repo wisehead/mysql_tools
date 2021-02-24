@@ -1,0 +1,87 @@
+source include/master-slave.inc;
+
+# check slave has no data
+connection slave;
+show databases;
+
+connection master;
+# create database
+create database if not exists testdb;
+
+# create table
+source include/have_innodb.inc;
+use testdb;
+SET storage_engine=innodb;
+create table tbl(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7));
+
+# insert
+#insert tbl values();
+#--error 1646
+insert tbl values(NULL, 2, 3, 4.4, 5.5, '6', '7', '8', '9');
+insert into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert low_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert high_priority into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+alter table tbl engine=myisam;
+insert delayed into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9');
+insert delayed ignore into tbl(col2, col4, col6, col8, col9) values(2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9'), (2, 4.4, '6', '8', '9');
+alter table tbl engine=innodb;
+insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9');
+insert tbl values(NULL, 1*2, 3+10, 4.4, 5.5, '6', '7', '8', '9');
+insert tbl values(NULL, default, default, default, default, default, default, '8', '9');
+insert tbl values(NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9'), (NULL, col2+10, 3+10, 4.4, 5.5, '6', '7', '8', '9') on duplicate key update col3=values(col3)+values(col3);
+insert low_priority ignore tbl set col2=default, col8='8', col9='9';
+insert high_priority tbl set col2=default, col8='8', col9='9' on duplicate key update col3=values(col3)+100;
+create table tbl2(col1 int not null auto_increment primary key, col2 int not null default 0 encrypt, col3 bigint not null default 0 encrypt, col4 float not null default 0.0 encrypt, col5 double not null default 0.0 encrypt, col6 char(10) not null default '' encrypt, col7 varchar(100) not null default '' encrypt, col8 text not null encrypt, col9 blob not null encrypt, key(col2), key(col3), key(col4), key(col5), key(col6), key(col7));
+insert tbl2 values(2, 12, 13, 14.4, 15.5, '16', '17', '18', '19');
+insert tbl2 values(10, 22, 23, 24.4, 25.5, '26', '27', '28', '29');
+insert high_priority ignore tbl select * from tbl2;
+insert low_priority ignore tbl(col2, col4, col6, col8, col9) select col2, col4, col6, col8, col9 from tbl2;
+select * from tbl;
+sync_slave_with_master;
+
+connection slave;
+show databases;
+use testdb;
+select * from tbl;
+
+connection master;
+show master status;
+purge master logs to 'master-bin.000001';
+purge binary logs before '2011-08-09 09:58:00';
+
+set sql_log_bin = 0;
+set sql_log_bin = 1;
+
+show binlog events;
+show binlog events in 'master-bin.000001';
+show binlog events from 106;
+show binlog events from 106 limit 1;
+show binary logs;
+show slave hosts;
+drop database testdb;
+sync_slave_with_master;
+reset master;
+show master status;
+
+connection slave;
+stop slave;
+reset slave;
+set global sql_slave_skip_counter=3;
+change master to master_host='127.0.0.1', master_port=13000,master_user='root',master_password='',master_log_file='master-bin.000001',master_log_pos=106;
+start slave io_thread;
+start slave sql_thread;
+stop slave;
+start slave;
+stop slave sql_thread;
+start slave sql_thread until master_log_file='master-bin.000001',master_log_pos=106;
+select sleep(1);
+stop slave sql_thread;
+start slave sql_thread until relay_log_file='relay-bin.0000001',relay_log_pos=106;
+
+select sleep(1);
+show slave status;
+load data from master;
+--error 1188
+load table tbl from master;
+stop slave;

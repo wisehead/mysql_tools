@@ -1,0 +1,133 @@
+# create database
+create database testdb1;
+create database if not exists testdb2 character set utf8;
+create schema if not exists testdb3 collate latin1_bin;
+create database if not exists testdb4 character set utf8 collate utf8_general_ci;
+
+# alter database
+alter database testdb1 charset latin1 collate latin1_bin;
+alter schema testdb3 charset utf8 collate utf8_general_ci;
+
+# create table
+--source include/have_innodb.inc
+use testdb1;
+SET storage_engine=innodb;
+create temporary table tbl1(id int encrypt);
+create table tbl2(id int encrypt, classid int not null encrypt, index idx_classid(classid));
+create table if not exists tbl3(id int encrypt);
+create table if not exists tbl4(id int not null default 1 encrypt);
+create table if not exists tbl5(id int not null auto_increment primary key);
+--error 1644
+create table if not exists tbl6(id int not null auto_increment primary key encrypt);
+create table if not exists tbl7(id int not null auto_increment primary key references tbl2(id));
+create table if not exists tbl8(id int not null auto_increment primary key references tbl2(id) match full on delete restrict);
+create table if not exists tbl9(id int not null auto_increment primary key, sex varchar(2) not null default 'M' encrypt, addressid int(1) not null encrypt references tbl2(id), index idx_addressid (addressid));
+create table if not exists tbl10(id int not null auto_increment primary key, sex varchar(2) not null default 'M' encrypt, addressid int(1) not null encrypt references tbl2(id), index addIndex (addressid), cid int not null encrypt, constraint FK_stu_class foreign key(cid) references tbl2(classid) on delete cascade);
+create table if not exists tbl11(id int not null auto_increment primary key, sex varchar(2) not null default 'M' encrypt, addressid int(1) not null encrypt references tbl2(id), index addIndex (addressid), key(addressid), constraint check(id>0 and addressed>0));
+create table if not exists tbl12(id int not null auto_increment primary key, sex varchar(2) not null default 'M' encrypt, addressid int(1) not null encrypt references tbl2(id), index addIndex (addressid), key(addressid), constraint check(id>0 and addressed>0))engine=innodb auto_increment=2;
+create table if not exists tbl13(id int not null auto_increment primary key, name varchar(10) encrypt, addressid int not null encrypt, index addIndex (addressid), key(addressid), constraint FK foreign key(addressid) references tbl2(classid), constraint check(id>0 and addressed>0)) engine=MyISAM auto_increment=2;
+create table if not exists tbl14(id int not null auto_increment primary key, addressid int not null encrypt, index addIndex (addressid), key(addressid), constraint FK foreign key(addressid) references tbl2(classid), constraint check(id>0 and addressed>0)) engine=MyISAM auto_increment=2 avg_row_length=10 default character set = latin1 collate=latin1_bin checksum=1 max_rows=5000 min_rows=1 comment='table14' insert_method=first;
+create table if not exists tbl15(id int not null auto_increment primary key, addressid int not null default 0 encrypt, index addIndex (addressid), key(addressid))engine=innodb ignore as select * from tbl2;
+      
+# alter table
+alter table tbl1 add column name varchar(20) not null default '' encrypt;
+alter table tbl1 add sex varchar(2) not null default 'M' encrypt first;
+alter table tbl1 add age int not null encrypt after sex;
+alter table tbl1 alter column name set default 'Ann';
+alter table tbl1 alter column name drop default;
+alter table tbl1 change column name new_name varchar(100) encrypt after id;
+alter table tbl1 change id id int(4) encrypt first;
+alter table tbl1 change new_name name varchar(50) not null default '' encrypt;
+alter table tbl1 modify column name varchar(10) not null default '' encrypt;
+alter table tbl1 change column name new_name varchar(100) encrypt after id;
+alter table tbl1 change id id int(4) encrypt first;
+alter table tbl1 change new_name name varchar(50) not null default '' encrypt;
+alter table tbl1 modify column name varchar(10) not null default '' encrypt;
+alter table tbl1 modify name varchar(100) not null encrypt after age;
+alter table tbl1 modify name varchar(50) not null encrypt after age, drop column sex, add primary key(name);
+alter table tbl1 drop primary key, add primary key PK(id,name);
+alter table tbl1 rename new_tbl1, convert to character set latin1 collate latin1_bin;
+alter table new_tbl1 rename tbl1;
+
+# rename table
+rename table tbl15 to new_tbl15;
+rename table tbl2 to new_tbl2, new_tbl2 to tbl2;
+rename table testdb1.new_tbl15 to testdb2.tbl15, testdb2.tbl15 to testdb1.tbl15;
+
+# index
+create index idx_name on tbl13(name(1));
+drop index idx_name on tbl13;
+create unique index idx_name using btree on tbl13(name(1));
+drop index idx_name on tbl13;
+--error 1283
+create fulltext index idx_name on tbl13(name);
+
+# view
+create or replace definer=current_user view view1 as select * from tbl15;
+create or replace definer='root'@'localhost' view view2 as select id from view1;
+create or replace definer=current_user view testdb2.view3(id) as select id from tbl15;
+create or replace algorithm=merge view view4 as select * from tbl15 with local check option;
+alter definer=current_user view view1 as select * from tbl14;
+alter definer='root'@'localhost' view view2 as select id from view1;
+alter definer=current_user view testdb2.view3(id) as select id from tbl14;
+alter algorithm=merge view view4 as select * from tbl15 with local check option;
+drop view if exists view1,view2 restrict;
+drop view if exists testdb2.view3,view4 cascade;
+
+delimiter //;
+
+# procedure
+create procedure testdb1.sp_myProc1(In inPara int,Out outPara int)
+begin
+    select inPara;
+    Select count(id) into outPara from tbl1;
+end //
+
+create definer=current_user procedure testdb1.sp_myProc2(In inPara int,Out outPara int)
+comment 'myProc'
+begin
+    select inPara;
+    select count(id) into outPara from tbl1;
+end //
+
+create definer='root'@'localhost'  procedure testdb1.sp_myProc3(In inPara int,Out outPara int)
+comment 'myProc' sql security definer contains sql deterministic
+begin
+    select inPara;
+    select count(id) into outPara from tbl1;
+end //
+
+alter procedure sp_myProc1 comment 'alterProc' reads sql data sql security invoker //
+drop procedure if exists sp_myProc1 //
+
+# function
+create definer=current_user function myFun(s char(20))
+returns char(50) 
+deterministic modifies sql data sql security invoker
+begin
+    delete from tbl1 order by id desc limit 1;
+    return concat('Hello','world');
+end //
+alter function myFun contains sql sql security invoker comment 'myFun' //
+drop function if exists myFun //
+
+# trigger
+create trigger myTrigger before insert on tbl10 for each row
+begin
+    insert into tbl2 values(1111,'1111',1111);
+end //
+drop trigger testdb1.myTrigger //
+
+delimiter ;//
+
+# drop table
+drop table tbl7;
+drop table if exists tbl3 restrict;
+drop table if exists tbl4,tbl5 cascade;
+drop temporary table if exists tbl1;
+
+# drop database
+drop database testdb1;
+drop database testdb2;
+drop database testdb3;
+drop database testdb4;
