@@ -1,0 +1,13 @@
+wget ??://github.com/thkukuk/rpcsvc-proto/releases/download/v1.4.1/rpcsvc-proto-1.4.1.tar.xz
+xz -d rpcsvc-proto-1.4.1.tar.xz
+tar -xvf rpcsvc-proto-1.4.1.tar
+cd rpcsvc-proto-1.4.1
+./configure
+make
+make install
+
+
+--注意??替换为htt+p+s，不然过不了。
+安装完成后，再次进行编译工作，报错消失，mysql编译通过。
+
+ln -s /usr/local/lib/libzstd.so.1 /lib64/

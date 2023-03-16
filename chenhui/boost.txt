@@ -1,0 +1,33 @@
+#boost
+wget https://sourceforge.net/projects/boost/files/boost/1.66.0/boost_1_66_0.tar.gz
+tar -zxvf boost_1_66_0.tar.gz
+cd boost_1_66_0
+./bootstrap.sh --prefix=/usr/local/stonedb-boost
+./b2 install --with=all
+
+
+
+#gtest
+git clone https://github.com/google/googletest.git -b release-1.12.0
+cd googletest
+mkdir build
+cd build
+cmake .. -DBUILD_GMOCK=OFF
+make
+make install
+
+
+
+ls /usr/local/include/
+...... gtest
+ls /usr/local/lib/ # 32-bit os
+ls /usr/local/lib64/ # 64-bit os
+...... cmake  libgtest.a  libgtest_main.a
+
+
+#stoneDB代码
+cd /
+git clone https://github.com/stoneatom/stonedb.git
+
+
+git clone https://github.com/stoneatom/stonedb-ee

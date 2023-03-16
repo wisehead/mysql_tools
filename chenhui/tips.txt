@@ -1,0 +1,25 @@
+wget https://github.com/facebook/rocksdb/archive/refs/tags/v6.12.6.tar.gz
+tar -zxvf v6.12.6.tar.gz
+cd rocksdb-6.12.6
+
+cmake ./ \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=/usr/local/stonedb-gcc-rocksdb \
+  -DCMAKE_INSTALL_LIBDIR=/usr/local/stonedb-gcc-rocksdb \
+  -DWITH_JEMALLOC=ON \
+  -DWITH_SNAPPY=ON \
+  -DWITH_LZ4=ON \
+  -DWITH_ZLIB=ON \
+  -DWITH_ZSTD=ON \
+  -DUSE_RTTI=ON \
+  -DROCKSDB_BUILD_SHARED=ON \
+  -DWITH_GFLAGS=OFF \
+  -DWITH_TOOLS=OFF \
+  -DWITH_BENCHMARK_TOOLS=OFF \
+  -DWITH_CORE_TOOLS=OFF 
+
+make -j`nproc`
+make install -j`nproc`
+
+
+ln -s /usr/local/lib/libsnappy.so.1 /lib64/

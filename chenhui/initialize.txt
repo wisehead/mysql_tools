@@ -1,0 +1,33 @@
+###创建目录
+mkdir -p /stonedb57/install/data
+mkdir -p /stonedb57/install/binlog
+mkdir -p /stonedb57/install/log
+mkdir -p /stonedb57/install/tmp
+mkdir -p /stonedb57/install/redolog
+mkdir -p /stonedb57/install/undolog
+chown -R mysql:mysql /stonedb57
+
+###配置my.cnf
+mv my.cnf my.cnf.bak
+vim /stonedb57/install/my.cnf
+[mysqld]
+port      = 3306
+socket    = /stonedb57/install/tmp/mysql.sock
+basedir   = /stonedb57/install
+datadir   = /stonedb57/install/data
+pid_file  = /stonedb57/install/data/mysqld.pid
+log_error = /stonedb57/install/log/mysqld.log
+innodb_log_group_home_dir   = /stonedb57/install/redolog/
+innodb_undo_directory       = /stonedb57/install/undolog/
+
+chown -R mysql:mysql /stonedb57/install/my.cnf
+
+###初始化实例
+/stonedb57/install/bin/mysqld --defaults-file=/stonedb57/install/my.cnf --initialize --user=mysql
+
+###启动实例
+/stonedb57/install/bin/mysqld_safe --defaults-file=/stonedb57/install/my.cnf --user=mysql &
+
+alter user 'root'@'localhost' identified by '666666';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '666666' WITH GRANT OPTION;
+FLUSH PRIVILEGES;

@@ -1,0 +1,8 @@
+yum -y install autoconf automake libedit-devel libtool ncurses-devel pcre-devel pkgconfig python-docutils python-sphinx
+yum -y install jemalloc-devel
+提示：如果yum源里没有jemalloc-devel则需要源码安装jemalloc-devel
+http://www.canonware.com/jemalloc/
+wget https://github.com/jemalloc/jemalloc/releases/download/3.6.0/jemalloc-3.6.0.tar.bz2
+tar -xvf jemalloc-3.6.0.tar.bz2 -C /usr/local/src
+cd /usr/local/src/jemalloc-3.6.0 && ./configure && make -j4 && make install
+ln -s /usr/local/lib/libjemalloc.so.1 /lib64/
