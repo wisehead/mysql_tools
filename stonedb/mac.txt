@@ -1,0 +1,1 @@
+./mysql-test-run.pl  --suite=tianmu tianmu.select  --nowarnings --force --nocheck-testcases --retry=0
